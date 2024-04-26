@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  ScrollView,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {deviceHeight, deviceWidth} from './Dimension';
 import Clock from './Clock';
@@ -31,57 +31,67 @@ const Dashboard = () => {
   const [todos, setTodos] = useState([]);
   const [showAddToDo, setShowAddToDo] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [deleteId, setDeleteId] = useState(null)
   const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [checkedIds, setCheckedIds] = useState([]);
 
   useEffect(() => {
     getData();
   }, []);
 
-  const getData = () => {
-    Axios.get('https://to-do-list-app-back-end.vercel.app/todo')
-      .then(res => {
-        setTodos(res.data.data);
-      })
-      .catch(error => console.error('Error fetching data: ', error));
+  const getData = async () => {
+    try {
+      const response = await Axios.get(
+        'https://to-do-list-app-back-end.vercel.app/todo',
+      );
+      setTodos(response.data.data);
+    } catch (error) {
+      console.error('Error fetching data: ', error);
+    }
   };
 
-  const toggleShowAddToDo = () => {
-    setShowAddToDo(!showAddToDo);
-  };
+  const toggleShowAddToDo = () => setShowAddToDo(prev => !prev);
 
-  // const toggleDeleteMode = () => {
-  //   setIsDeleteMode(!isDeleteMode);
-  // };
+  const handleEdit = id => setEditingId(id);
 
-  const handleEdit = id => {
-    setEditingId(id);
-  };
-
-  const handleDelete = id => {
-    setDeleteId(id);
-  };
-
-  const handleSave = (id, updatedText) => {
+  const handleSave = async (id, updatedText) => {
     const data = {
       todo: updatedText,
-      completed: todos.find(todo => todo.id === id).completed,
+      completed: todos.find(todo => todo.id === id)?.completed || false,
     };
 
-    Axios.put(`https://to-do-list-app-back-end.vercel.app/todo/${id}`, data)
-      .then(() => {
-        getData();
-        setEditingId(null);
-      })
-      .catch(error => console.error('Error updating data: ', error));
+    try {
+      await Axios.put(
+        `https://to-do-list-app-back-end.vercel.app/todo/${id}`,
+        data,
+      );
+      getData();
+      setEditingId(null);
+    } catch (error) {
+      console.error('Error updating data: ', error);
+    }
   };
 
-  const handleIconPress = () => {
-    if (isDeleteMode) {
-      setIsDeleteMode(!isDeleteMode); // Exit delete mode
-    } else {
-      setShowAddToDo(!showAddToDo); // Toggle the Add ToDo form
+  const handleDeleteChecked = async () => {
+    if (checkedIds.length > 0) {
+      try {
+        await Promise.all(
+          checkedIds.map(id =>
+            Axios.delete(
+              `https://to-do-list-app-back-end.vercel.app/todo/${id}`,
+            ),
+          ),
+        );
+        getData();
+        setIsDeleteMode(false);
+        setCheckedIds([]);
+      } catch (error) {
+        console.error('Error deleting todos: ', error);
+      }
     }
+  };
+
+  const showAddToDoComponent = () => {
+    setShowAddToDo(true);
   };
 
   const renderItem = ({item}) => (
@@ -91,73 +101,79 @@ const Dashboard = () => {
       onEdit={handleEdit}
       onSave={handleSave}
       isEditing={editingId === item.id}
-      onDelete={handleDelete}
-      isDelete={deleteId === item.id}
+      isDeleteMode={isDeleteMode}
+      onActivateDeleteMode={() => setIsDeleteMode(true)}
+      checkedIds={checkedIds}
+      setCheckedIds={setCheckedIds}
     />
   );
 
   return (
-    <View style={styles.container}>
-      <ScrollView nestedScrollEnabled contentContainerStyle={{flexGrow: 1}}>
-        <StatusBar
-          translucent
-          barStyle={'dark-content'}
-          backgroundColor={'transparent'}
-        />
-        <ImageBackground
-          source={require('../assets/bgdashboard.png')}
-          style={styles.background}>
-          <View style={styles.welcomeWrapping}>
-            <Image
-              source={require('../assets/photo.jpeg')}
-              style={styles.userImage}
-            />
-            <Text style={styles.welcomeText}>Welcome Arda!</Text>
-          </View>
+    <View style={{flex: 1}}>
+      <StatusBar
+        translucent
+        barStyle={'dark-content'}
+        backgroundColor={'transparent'}
+      />
+      <View>
+        <KeyboardAvoidingView behavior="position" style={{flexGrow: 1}}>
+          <ImageBackground
+            source={require('../assets/bgdashboard.png')}
+            style={styles.background}>
+            <View style={styles.welcomeWrapping}>
+              <Image
+                source={require('../assets/photo.jpeg')}
+                style={styles.userImage}
+              />
+              <Text style={styles.welcomeText}>Welcome Arda!</Text>
+            </View>
 
-          <View style={styles.greetingTextWrapping}>
-            <Text style={styles.greetingText}>Good Morning</Text>
-          </View>
-
-          <View>
-            <Clock />
-            <Text style={styles.tasksListText}>Tasks List</Text>
-          </View>
-
-          <View style={styles.toDoContainer}>
-            <View style={styles.dailyTaskWrapping}>
-              <Text style={styles.dailyTaskText}>
-                {isDeleteMode ? 'Pilih Item' : 'Daily Tasks'}
-              </Text>
-
-              <TouchableOpacity
-                onPress={handleIconPress}
-                style={styles.plusWrapping}>
-                {isDeleteMode ? (
-                  <Trash width={25} height={25} />
-                ) : (
-                  <Plus width={25} height={21} />
-                )}
-              </TouchableOpacity>
+            <View style={styles.greetingTextWrapping}>
+              <Text style={styles.greetingText}>Good Morning</Text>
             </View>
 
             <View>
-              <FlatList
-                data={todos}
-                renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
-                style={styles.toDoWrapping}
-                nestedScrollEnabled
-                ListHeaderComponent={
-                  showAddToDo ? (
-                    <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
-                  ) : null
-                }
-              />
+              <Clock />
+              <Text style={styles.tasksListText}>Tasks List</Text>
             </View>
-          </View>
-        </ImageBackground>
-      </ScrollView>
+
+            <View style={styles.toDoContainer}>
+              <View style={styles.dailyTaskWrapping}>
+                <Text style={styles.dailyTaskText}>
+                  {isDeleteMode ? 'Pilih Item' : 'Daily Tasks'}
+                </Text>
+
+                <TouchableOpacity
+                  onPress={
+                    isDeleteMode ? handleDeleteChecked : showAddToDoComponent
+                  }
+                  style={styles.plusWrapping}>
+                  {isDeleteMode ? (
+                    <Trash width={25} height={25} />
+                  ) : (
+                    <Plus width={25} height={21} />
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              <View>
+                <FlatList
+                  data={todos}
+                  renderItem={renderItem}
+                  keyExtractor={item => item.id.toString()}
+                  style={styles.toDoWrapping}
+                  nestedScrollEnabled
+                  ListHeaderComponent={
+                    showAddToDo ? (
+                      <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
+                    ) : null
+                  }
+                />
+              </View>
+            </View>
+          </ImageBackground>
+        </KeyboardAvoidingView>
+      </View>
     </View>
   );
 };
@@ -173,7 +189,7 @@ const styles = StyleSheet.create({
   welcomeWrapping: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: hp('2%'),
+    marginTop: hp('3%'),
   },
   userImage: {
     height: 110,
@@ -210,7 +226,7 @@ const styles = StyleSheet.create({
     height: 270,
     borderRadius: 8,
     marginTop: hp('0.1%'),
-    marginHorizontal: wp('7%'),
+    marginHorizontal: wp('8%'),
   },
   dailyTaskWrapping: {
     flexDirection: 'row',

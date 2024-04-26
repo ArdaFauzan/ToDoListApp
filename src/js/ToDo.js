@@ -6,7 +6,6 @@ import {
   View,
   TextInput,
   StyleSheet,
-  Pressable,
 } from 'react-native';
 import BoxFull from '../assets/box_full.png';
 import Box from '../assets/box.png';
@@ -14,19 +13,30 @@ import Axios from 'axios';
 import Check from '../assets/check.svg';
 import Close from '../assets/close.svg';
 import CheckBox from '@react-native-community/checkbox';
-import AnimatedCheckbox from 'react-native-checkbox-reanimated';
 
-const ToDo = ({list, onGet, onEdit, onSave, isEditing, onDelete, isDelete}) => {
+const ToDo = ({
+  list,
+  onGet,
+  onEdit,
+  onSave,
+  isEditing,
+  onDelete,
+  isDeleteMode,
+  onActivateDeleteMode,
+  checkedIds, // Tambahkan ini sebagai props
+  setCheckedIds, // Tambahkan ini sebagai props
+}) => {
   const [completed, setCompleted] = useState(list.completed);
   const [editText, setEditText] = useState(list.todo);
-  const [checked, setChecked] = useState(false);
 
+  // Fungsi untuk mengubah status 'completed' to-do
   const putCompleted = () => {
     const newCompleted = !completed;
     setCompleted(newCompleted);
     updateTodo(newCompleted);
   };
 
+  // Fungsi untuk memperbarui to-do
   const updateTodo = newCompleted => {
     const data = {
       todo: editText,
@@ -41,8 +51,18 @@ const ToDo = ({list, onGet, onEdit, onSave, isEditing, onDelete, isDelete}) => {
     });
   };
 
-  const handleCheckboxPress = () => {
-    setChecked(!checked);
+  // Fungsi untuk mengaktifkan mode hapus
+  const handleLongPress = () => {
+    onActivateDeleteMode();
+  };
+
+  // Fungsi untuk mengelola perubahan pada checkbox
+  const handleCheckboxChange = (id, isChecked) => {
+    if (isChecked) {
+      setCheckedIds(prevIds => [...prevIds, id]);
+    } else {
+      setCheckedIds(prevIds => prevIds.filter(checkedId => checkedId !== id));
+    }
   };
 
   return (
@@ -80,7 +100,7 @@ const ToDo = ({list, onGet, onEdit, onSave, isEditing, onDelete, isDelete}) => {
         <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <TouchableOpacity
             onPress={() => onEdit(list.id)}
-            onLongPress={() => onDelete(list.id)}>
+            onLongPress={handleLongPress}>
             <Text
               style={{
                 color: completed ? 'gray' : '#000000',
@@ -92,12 +112,15 @@ const ToDo = ({list, onGet, onEdit, onSave, isEditing, onDelete, isDelete}) => {
             </Text>
           </TouchableOpacity>
 
-          {isDelete && (
-            <View style={{position: 'absolute', right: 10, left: 160}}>
+          {isDeleteMode && (
+            <View
+              style={{position: 'absolute', right: 10, left: 160, bottom: 30}}>
               <CheckBox
-                value={checked}
-                onValueChange={newValue => setChecked(newValue)}
-                tintColors={{true: '#787878', false: '#494949'}}
+                value={checkedIds.includes(list.id)}
+                onValueChange={newValue =>
+                  handleCheckboxChange(list.id, newValue)
+                }
+                style={{position: 'absolute', right: 10}}
               />
             </View>
           )}
