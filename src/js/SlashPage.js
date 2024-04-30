@@ -7,10 +7,14 @@ import {
   View,
   StyleSheet,
 } from 'react-native';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 import SlashImage from '../assets/slashimage.svg';
 
-const SlashPage = ({navigation}) => {
+const SlashPage2 = ({navigation}) => {
   return (
     <View style={styles.container}>
       <StatusBar
@@ -19,23 +23,18 @@ const SlashPage = ({navigation}) => {
         backgroundColor={'transparent'}
       />
 
-      <View style={styles.backgroundWrapping}>
-        <ImageBackground
-          source={require('../assets/background.png')}
-          style={styles.background}
-        />
-      </View>
+      <ImageBackground
+        source={require('../assets/Elipse.png')}
+        style={styles.background}
+      />
 
       <View style={styles.contentWrapping}>
         <SlashImage height={261} width={270} />
-
-        <View>
-          <Text style={styles.tittleText}>Get Things Done With TODO</Text>
-          <Text style={styles.descText}>
-            Lorem ipsum dolor sit amet consectetur. Tellus consequat euismod
-            cras sapien venenatis.
-          </Text>
-        </View>
+        <Text style={styles.tittleText}>Get Things Done With TODO</Text>
+        <Text style={styles.descText}>
+          Lorem ipsum dolor sit amet consectetur. Tellus consequat euismod cras
+          sapien venenatis.
+        </Text>
 
         <TouchableOpacity onPress={() => navigation.navigate('SignInPage')}>
           <View style={styles.buttonWrapping}>
@@ -51,33 +50,28 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  backgroundWrapping: {
-    position: 'absolute',
-  },
   background: {
-    height: deviceHeight,
-    width: deviceWidth,
+    height: deviceHeight / 5,
+    width: deviceWidth / 2,
   },
   contentWrapping: {
     justifyContent: 'center',
     alignItems: 'center',
-    flex: 1,
-    marginHorizontal: 43,
   },
   tittleText: {
     fontSize: 18,
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginTop: 26,
+    marginTop: hp('1.9%'),
   },
   descText: {
     fontSize: 15,
     color: 'black',
     fontWeight: '400',
     textAlign: 'center',
-    marginTop: 10,
-    marginHorizontal: 25,
+    marginTop: hp('1%'),
+    marginHorizontal: wp('6%'),
   },
   buttonWrapping: {
     backgroundColor: '#50C2C9',
@@ -85,7 +79,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 284,
     height: 74,
-    marginTop: 26,
+    marginTop: hp('2%'),
     borderRadius: 10,
   },
   buttonText: {
@@ -96,4 +90,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SlashPage;
+export default SlashPage2;

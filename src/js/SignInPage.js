@@ -17,29 +17,6 @@ const SignInPage = ({navigation}) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Uncomment and update the handleSignIn function as needed
-  // const handleSignIn = async () => {
-  //   try {
-  //     const data = await AsyncStorage.getItem('registeredUser');
-  //     const userData = JSON.parse(data);
-  //     // Lakukan pengecekan di sini
-  //     if (
-  //       (userData.email === signIn ||
-  //         userData.userName === signIn) &&
-  //       userData.password === pass
-  //     ) {
-  //       // Email dan password cocok, lakukan aksi yang sesuai
-  //       console.log('Email dan password cocok!');
-  //     } else {
-  //       // Email atau password tidak cocok, lakukan aksi yang sesuai
-  //       console.log('Email atau password tidak cocok!');
-  //     }
-  //     navigation.navigate('Dashboard');
-  //   } catch (error) {
-  //     console.error('Terjadi kesalahan saat mengambil data:', error);
-  //   }
-  // };
-
   const showPasswordHandler = () => {
     setShowPassword(!showPassword);
   };

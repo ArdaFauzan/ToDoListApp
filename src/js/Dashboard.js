@@ -112,7 +112,7 @@ const Dashboard2 = () => {
 
       <KeyboardAvoidingView behavior="position">
         <ImageBackground
-          source={require('../assets/bgdashboard2.png')}
+          source={require('../assets/bgdashboard.png')}
           style={styles.background}>
           <View style={styles.welcomeWrapping}>
             <Image
@@ -143,7 +143,7 @@ const Dashboard2 = () => {
                 {isDeleteMode ? (
                   <Trash width={28} height={28} />
                 ) : (
-                  <Plus width={29} height={29} />
+                  <Plus width={29} height={28} />
                 )}
               </TouchableOpacity>
             </View>

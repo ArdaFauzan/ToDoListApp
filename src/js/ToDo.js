@@ -92,31 +92,31 @@ const ToDo = ({
           </View>
         </>
       ) : (
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+        <View style={styles.toDoListWrapping}>
           <TouchableOpacity
             onPress={() => onEdit(list.id)}
             onLongPress={handleLongPress}>
             <Text
-              style={{
-                color: completed ? 'gray' : '#000000',
-                fontSize: 14,
-                fontWeight: '400',
-                textDecorationLine: completed ? 'line-through' : 'none',
-              }}>
+              style={[
+                styles.toDoList,
+                {
+                  color: completed ? 'gray' : '#000000',
+                  textDecorationLine: completed ? 'line-through' : 'none',
+                },
+              ]}>
               {list.todo}
             </Text>
           </TouchableOpacity>
 
           {isDeleteMode && (
-            <View
-              style={{position: 'absolute', right: 10, left: 190, bottom: 26}}>
+            <View style={styles.checkBoxWrapping}>
               <CheckBox
                 value={checkedIds.includes(list.id)}
                 onValueChange={newValue =>
                   handleCheckboxChange(list.id, newValue)
                 }
                 tintColors={('#787878', '#494949')}
-                style={{position: 'absolute', right: 10}}
+                style={styles.checkBox}
               />
             </View>
           )}
@@ -158,6 +158,24 @@ const styles = StyleSheet.create({
   },
   close: {
     marginLeft: 20,
+  },
+  toDoListWrapping: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  toDoList: {
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  checkBoxWrapping: {
+    position: 'absolute',
+    right: 10,
+    left: 190,
+    bottom: 26,
+  },
+  checkBox: {
+    position: 'absolute',
+    right: 10,
   },
 });
 
