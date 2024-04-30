@@ -9,42 +9,18 @@ import {
   ImageBackground,
   Image,
 } from 'react-native';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 
-const RegisterPage = ({navigation}) => {
+const RegisterPage2 = ({navigation}) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
-  // handleAuthentication = async () => {
-  //   auth()
-  //     .createUserWithEmailAndPassword(this.state.email, this.state.pass)
-  //     .then(async () => {
-  //       console.log('User account created & signed in!');
-  //       // Simpan email dan password
-  //       await AsyncStorage.setItem(
-  //         'registeredUser',
-  //         JSON.stringify({
-  //           email: this.state.email,
-  //           password: this.state.pass,
-  //           userName: this.state.name,
-  //         }),
-  //       );
-  //       // Navigasi kembali ke halaman Sign In Page
-  //       this.props.navigation.navigate('Dashboard');
-  //     })
-  //     .catch(error => {
-  //       if (error.code === 'auth/email-already-in-use') {
-  //         console.log('That email address is already in use!');
-  //       }
-  //       if (error.code === 'auth/invalid-email') {
-  //         console.log('That email address is invalid!');
-  //       }
-  //       console.error(error);
-  //     });
-  // };
 
   const showPasswordHandler = () => {
     setShowPassword(!showPassword);
@@ -58,76 +34,73 @@ const RegisterPage = ({navigation}) => {
         backgroundColor={'transparent'}
       />
 
-      <View style={styles.backgroundWrapping}>
-        <ImageBackground
-          source={require('../assets/background.png')}
-          style={styles.background}
-        />
-      </View>
+      <ImageBackground
+        source={require('../assets/Elipse.png')}
+        style={styles.background}
+      />
 
       <View style={styles.contentWrapping}>
         <Text style={styles.tittleText}>Welcome OnBoard !</Text>
         <Text style={styles.descText}>Let’s checkup your tasks!</Text>
 
-        <View>
-          <TextInput
-            value={name}
-            onChangeText={value => setName(value)}
-            placeholder="Enter your Name"
-            placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            style={styles.textInput}
-          />
-          <TextInput
-            value={email}
-            onChangeText={value => setEmail(value)}
-            placeholder="Enter your Email"
-            placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            style={styles.textInput}
-          />
+        <TextInput
+          value={name}
+          onChangeText={value => setName(value)}
+          placeholder="Enter your Name"
+          placeholderTextColor="rgba(0, 0, 0, 0.75)"
+          style={styles.textInput}
+        />
+        <TextInput
+          value={email}
+          onChangeText={value => setEmail(value)}
+          placeholder="Enter your Email"
+          placeholderTextColor="rgba(0, 0, 0, 0.75)"
+          style={styles.textInput}
+        />
 
-          <View style={styles.passwordTextInputWrapping}>
-            <TextInput
-              value={password}
-              onChangeText={value => setPassword(value)}
-              placeholder="Enter your Password"
-              placeholderTextColor="rgba(0, 0, 0, 0.75)"
-              secureTextEntry={!showPassword}
-              style={styles.passwordTextInput}
+        <View style={styles.passwordTextInputWrapping}>
+          <TextInput
+            value={password}
+            onChangeText={value => setPassword(value)}
+            placeholder="Enter your Password"
+            placeholderTextColor="rgba(0, 0, 0, 0.75)"
+            secureTextEntry={!showPassword}
+            style={styles.passwordTextInput}
+          />
+          <TouchableOpacity
+            style={styles.showPasswordTouch}
+            onPress={showPasswordHandler}>
+            <Image
+              source={
+                showPassword
+                  ? require('../assets/hide.png')
+                  : require('../assets/view.png')
+              }
+              style={styles.eyeImage}
             />
-            <TouchableOpacity
-              style={styles.showPasswordTouch}
-              onPress={showPasswordHandler}>
-              <Image
-                source={
-                  showPassword
-                    ? require('../assets/hide.png')
-                    : require('../assets/view.png')
-                }
-                style={styles.eyeImage}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            value={confirmPassword}
-            onChangeText={value => setConfirmPassword(value)}
-            placeholder="Confirm your Password"
-            placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            secureTextEntry={true}
-            style={styles.textInput}
-          />
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate('SignInPage')}>
-          <View style={styles.getStartedButtonWrapping}>
-            <Text style={styles.getStartedText}>Get Started</Text>
-          </View>
+        <TextInput
+          value={confirmPassword}
+          onChangeText={value => setConfirmPassword(value)}
+          placeholder="Confirm your Password"
+          placeholderTextColor="rgba(0, 0, 0, 0.75)"
+          secureTextEntry={true}
+          style={styles.textInput}
+        />
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate('SignInPage')}
+          style={styles.buttonWrapping}>
+          <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
 
         <View style={styles.alreadyAccountWrapping}>
           <Text style={styles.alreadyAccountText}>
             Already have a account ?
           </Text>
+
           <TouchableOpacity onPress={() => navigation.navigate('SignInPage')}>
             <Text style={styles.signInText}> Sign In</Text>
           </TouchableOpacity>
@@ -141,17 +114,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  backgroundWrapping: {
-    position: 'absolute',
-  },
-  background: {
-    height: deviceHeight,
-    width: deviceWidth,
-  },
   contentWrapping: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  background: {
+    height: deviceHeight / 5,
+    width: deviceWidth / 2,
   },
   tittleText: {
     fontSize: 20,
@@ -162,7 +131,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#000000',
     fontWeight: '400',
-    marginTop: 1,
+    marginBottom: hp('1%'),
   },
   textInput: {
     width: 306,
@@ -170,16 +139,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#D8D8D8',
     color: 'black',
     fontSize: 14,
-    marginTop: 20,
+    marginBottom: hp('2%'),
     borderRadius: 27,
     paddingLeft: 34,
     paddingRight: 20,
     fontWeight: '400',
   },
   passwordTextInputWrapping: {
-    marginTop: 20,
+    marginBottom: hp('2%'),
   },
   passwordTextInput: {
+    width: 306,
     height: 54,
     backgroundColor: '#D8D8D8',
     color: 'black',
@@ -198,16 +168,15 @@ const styles = StyleSheet.create({
     height: 20,
     width: 20,
   },
-  getStartedButtonWrapping: {
+  buttonWrapping: {
     backgroundColor: '#50C2C9',
     justifyContent: 'center',
-    alignSelf: 'center',
     width: 306,
     height: 83,
-    marginTop: 19,
+    marginTop: hp('1%'),
     borderRadius: 10,
   },
-  getStartedText: {
+  buttonText: {
     fontSize: 20,
     color: '#ffffff',
     fontWeight: '700',
@@ -215,23 +184,20 @@ const styles = StyleSheet.create({
   },
   alreadyAccountWrapping: {
     flexDirection: 'row',
+    marginTop: hp('0.8%'),
     justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: 8,
+    alignItems: 'center',
   },
   alreadyAccountText: {
     fontSize: 14,
     fontWeight: '400',
     color: 'rgba(0, 0, 0, 0.75)',
-    textAlign: 'center',
-    justifyContent: 'center',
   },
   signInText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: 'rgba(0, 112, 112, 0.75)',
-    textAlign: 'center',
   },
 });
 
-export default RegisterPage;
+export default RegisterPage2;

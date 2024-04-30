@@ -12,7 +12,7 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="SlashPage"
+        initialRouteName="RegisterPage"
         screenOptions={{headerShown: false}}>
         <Stack.Screen name="SlashPage" component={SlashPage} />
         <Stack.Screen name="SignInPage" component={SignInPage} />
