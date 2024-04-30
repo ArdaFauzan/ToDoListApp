@@ -20,23 +20,20 @@ const ToDo = ({
   onEdit,
   onSave,
   isEditing,
-  onDelete,
   isDeleteMode,
   onActivateDeleteMode,
-  checkedIds, // Tambahkan ini sebagai props
-  setCheckedIds, // Tambahkan ini sebagai props
+  checkedIds,
+  setCheckedIds,
 }) => {
   const [completed, setCompleted] = useState(list.completed);
   const [editText, setEditText] = useState(list.todo);
 
-  // Fungsi untuk mengubah status 'completed' to-do
   const putCompleted = () => {
     const newCompleted = !completed;
     setCompleted(newCompleted);
     updateTodo(newCompleted);
   };
 
-  // Fungsi untuk memperbarui to-do
   const updateTodo = newCompleted => {
     const data = {
       todo: editText,
@@ -51,12 +48,10 @@ const ToDo = ({
     });
   };
 
-  // Fungsi untuk mengaktifkan mode hapus
   const handleLongPress = () => {
     onActivateDeleteMode();
   };
 
-  // Fungsi untuk mengelola perubahan pada checkbox
   const handleCheckboxChange = (id, isChecked) => {
     if (isChecked) {
       setCheckedIds(prevIds => [...prevIds, id]);
@@ -114,12 +109,13 @@ const ToDo = ({
 
           {isDeleteMode && (
             <View
-              style={{position: 'absolute', right: 10, left: 160, bottom: 30}}>
+              style={{position: 'absolute', right: 10, left: 190, bottom: 26}}>
               <CheckBox
                 value={checkedIds.includes(list.id)}
                 onValueChange={newValue =>
                   handleCheckboxChange(list.id, newValue)
                 }
+                tintColors={('#787878', '#494949')}
                 style={{position: 'absolute', right: 10}}
               />
             </View>
@@ -132,7 +128,7 @@ const ToDo = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 15,
+    marginBottom: 19,
     flexDirection: 'row',
     alignItems: 'center',
   },

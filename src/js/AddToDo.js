@@ -1,11 +1,5 @@
 import React, {useState} from 'react';
-import {
-  View,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import {View, TouchableOpacity, TextInput, StyleSheet} from 'react-native';
 import Axios from 'axios';
 import Check from '../assets/check.svg';
 import Close from '../assets/close.svg';
@@ -21,7 +15,10 @@ const AddToDo = ({onGet, onClose}) => {
     };
 
     if (newToDo) {
-      Axios.post('https://to-do-list-app-back-end.vercel.app/todo', data)
+      Axios.post(
+        'https://to-do-list-app-back-end.vercel.app/todo/createtodo',
+        data,
+      )
         .then(res => {
           setNewToDo('');
           onGet();

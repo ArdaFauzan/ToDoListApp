@@ -1,33 +1,27 @@
 import React, {useState, useEffect} from 'react';
 import {
-  Image,
-  ImageBackground,
-  StatusBar,
-  Text,
   View,
+  Text,
+  StatusBar,
+  ImageBackground,
+  Image,
   TouchableOpacity,
-  StyleSheet,
   FlatList,
   KeyboardAvoidingView,
+  StyleSheet,
 } from 'react-native';
-import {deviceHeight, deviceWidth} from './Dimension';
-import Clock from './Clock';
-import Axios from 'axios';
-import ToDo from './ToDo';
-import Plus from '../assets/plus.svg';
-import AddToDo from './AddToDo';
-import Trash from '../assets/trash.svg';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import Clock from './Clock';
+import Axios from 'axios';
+import Plus from '../assets/plus.svg';
+import Trash from '../assets/trash.svg';
+import ToDo from './ToDo';
+import AddToDo from './AddToDo';
 
-//Fixing UI : https://stackoverflow.com/questions/65109669/how-to-make-a-react-native-app-suitable-for-all-dimensions
-/*
-Trashnya belum muncul
-Cara buat klik trash terus ngapus
-*/
-const Dashboard = () => {
+const Dashboard2 = () => {
   const [todos, setTodos] = useState([]);
   const [showAddToDo, setShowAddToDo] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -41,7 +35,7 @@ const Dashboard = () => {
   const getData = async () => {
     try {
       const response = await Axios.get(
-        'https://to-do-list-app-back-end.vercel.app/todo',
+        'https://to-do-list-app-back-end.vercel.app/todo/gettodo',
       );
       setTodos(response.data.data);
     } catch (error) {
@@ -61,7 +55,7 @@ const Dashboard = () => {
 
     try {
       await Axios.put(
-        `https://to-do-list-app-back-end.vercel.app/todo/${id}`,
+        `https://to-do-list-app-back-end.vercel.app/todo/updatetodo/${id}`,
         data,
       );
       getData();
@@ -77,7 +71,7 @@ const Dashboard = () => {
         await Promise.all(
           checkedIds.map(id =>
             Axios.delete(
-              `https://to-do-list-app-back-end.vercel.app/todo/${id}`,
+              `https://to-do-list-app-back-end.vercel.app/todo/deletetodo/${id}`,
             ),
           ),
         );
@@ -109,71 +103,65 @@ const Dashboard = () => {
   );
 
   return (
-    <View style={{flex: 1}}>
+    <View style={styles.container}>
       <StatusBar
         translucent
         barStyle={'dark-content'}
         backgroundColor={'transparent'}
       />
-      <View>
-        <KeyboardAvoidingView behavior="position" style={{flexGrow: 1}}>
-          <ImageBackground
-            source={require('../assets/bgdashboard.png')}
-            style={styles.background}>
-            <View style={styles.welcomeWrapping}>
-              <Image
-                source={require('../assets/photo.jpeg')}
-                style={styles.userImage}
-              />
-              <Text style={styles.welcomeText}>Welcome Arda!</Text>
+
+      <KeyboardAvoidingView behavior="position">
+        <ImageBackground
+          source={require('../assets/bgdashboard2.png')}
+          style={styles.background}>
+          <View style={styles.welcomeWrapping}>
+            <Image
+              source={require('../assets/photo.jpeg')}
+              style={styles.userImage}
+            />
+
+            <Text style={styles.welcomeText}>Welcome Arda!</Text>
+          </View>
+        </ImageBackground>
+
+        <View>
+          <Text style={styles.greetingText}>Good Morning</Text>
+          <Clock />
+          <Text style={styles.taskListText}>Tasks List</Text>
+
+          <View style={styles.toDoContainer}>
+            <View style={styles.dailyTaskWrapping}>
+              <Text style={styles.dailyTaskText}>
+                {isDeleteMode ? 'Pilih Item' : 'Daily Tasks'}
+              </Text>
+
+              <TouchableOpacity
+                style={styles.plusWrapping}
+                onPress={
+                  isDeleteMode ? handleDeleteChecked : showAddToDoComponent
+                }>
+                {isDeleteMode ? (
+                  <Trash width={28} height={28} />
+                ) : (
+                  <Plus width={29} height={29} />
+                )}
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.greetingTextWrapping}>
-              <Text style={styles.greetingText}>Good Morning</Text>
-            </View>
-
-            <View>
-              <Clock />
-              <Text style={styles.tasksListText}>Tasks List</Text>
-            </View>
-
-            <View style={styles.toDoContainer}>
-              <View style={styles.dailyTaskWrapping}>
-                <Text style={styles.dailyTaskText}>
-                  {isDeleteMode ? 'Pilih Item' : 'Daily Tasks'}
-                </Text>
-
-                <TouchableOpacity
-                  onPress={
-                    isDeleteMode ? handleDeleteChecked : showAddToDoComponent
-                  }
-                  style={styles.plusWrapping}>
-                  {isDeleteMode ? (
-                    <Trash width={25} height={25} />
-                  ) : (
-                    <Plus width={25} height={21} />
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              <View>
-                <FlatList
-                  data={todos}
-                  renderItem={renderItem}
-                  keyExtractor={item => item.id.toString()}
-                  style={styles.toDoWrapping}
-                  nestedScrollEnabled
-                  ListHeaderComponent={
-                    showAddToDo ? (
-                      <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
-                    ) : null
-                  }
-                />
-              </View>
-            </View>
-          </ImageBackground>
-        </KeyboardAvoidingView>
-      </View>
+            <FlatList
+              data={todos}
+              renderItem={renderItem}
+              keyExtractor={item => item.id.toString()}
+              style={styles.toDo}
+              ListHeaderComponent={
+                showAddToDo ? (
+                  <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
+                ) : null
+              }
+            />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -183,19 +171,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    width: deviceWidth,
-    height: deviceHeight,
+    width: 360,
+    height: 230,
   },
   welcomeWrapping: {
-    alignItems: 'center',
     justifyContent: 'center',
-    marginTop: hp('3%'),
+    flex: 1,
+    alignItems: 'center',
+    marginTop: hp('8%'),
   },
   userImage: {
     height: 110,
     width: 110,
     borderRadius: 55,
-    marginTop: hp('12%'),
   },
   welcomeText: {
     fontSize: 20,
@@ -203,52 +191,50 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: hp('1%'),
   },
-  greetingTextWrapping: {
-    alignSelf: 'flex-end',
-    marginTop: hp('2%'),
-    marginRight: wp('3%'),
-  },
   greetingText: {
     fontSize: 20,
     color: 'rgba(0, 0, 0, 0.85)',
     fontWeight: 'bold',
+    textAlign: 'right',
+    marginRight: wp('5%'),
+    marginTop: hp('1%'),
   },
-  tasksListText: {
+  taskListText: {
     color: 'rgba(0, 0, 0, 0.85)',
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: hp('1%'),
-    marginLeft: wp('4%'),
+    marginLeft: wp('7%'),
   },
   toDoContainer: {
     backgroundColor: '#ECECEC',
-    width: 303,
-    height: 270,
+    width: 306,
+    height: 290,
     borderRadius: 8,
-    marginTop: hp('0.1%'),
+    marginTop: hp('1%'),
     marginHorizontal: wp('8%'),
   },
   dailyTaskWrapping: {
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    marginLeft: wp('4%'),
-    marginTop: hp('1%'),
+    flexDirection: 'row',
   },
   dailyTaskText: {
     fontSize: 17,
     color: '#000000',
     fontWeight: '500',
-  },
-  plusWrapping: {
-    marginRight: wp('4%'),
+    marginLeft: wp('5%'),
     marginTop: hp('1%'),
   },
-  toDoWrapping: {
+  plusWrapping: {
+    marginRight: wp('5%'),
+    marginTop: hp('1%'),
+    alignSelf: 'center',
+  },
+  toDo: {
     marginLeft: wp('10%'),
-    marginTop: hp('0.1%'),
-    marginBottom: hp('6%'),
+    marginBottom: hp('1%'),
+    marginTop: hp('0.7%'),
   },
 });
 
-export default Dashboard;
+export default Dashboard2;
