@@ -9,10 +9,14 @@ import {
   Text,
   StyleSheet,
 } from 'react-native';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 import SignInImage from '../assets/signinimage.svg';
 
-const SignInPage = ({navigation}) => {
+const SignInPage2 = ({navigation}) => {
   const [signIn, setSignIn] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,58 +33,57 @@ const SignInPage = ({navigation}) => {
         backgroundColor={'transparent'}
       />
 
-      <View style={styles.backgroundWrapping}>
-        <ImageBackground
-          source={require('../assets/background.png')}
-          style={styles.background}
-        />
-      </View>
+      <ImageBackground
+        source={require('../assets/Elipse.png')}
+        style={styles.background}
+      />
 
       <View style={styles.contentWrapping}>
         <Text style={styles.tittleText}>Welcome Back!</Text>
-        <SignInImage height={152} width={153} />
 
-        <View>
+        <View style={{marginBottom: hp('2%')}}>
+          <SignInImage height={152} width={153} />
+        </View>
+
+        <TextInput
+          value={signIn}
+          onChangeText={value => setSignIn(value)}
+          placeholder="Enter your Email or Name"
+          placeholderTextColor="rgba(0, 0, 0, 0.75)"
+          style={styles.emailTextInput}
+        />
+
+        <View style={styles.passwordWrapping}>
           <TextInput
-            value={signIn}
-            onChangeText={value => setSignIn(value)}
-            placeholder="Enter your Email or Name"
+            value={password}
+            onChangeText={value => setPassword(value)}
+            placeholder="Enter your Password"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            style={styles.emailTextInput}
+            secureTextEntry={!showPassword}
+            style={styles.passwordTextInput}
           />
-
-          <View style={styles.passwordWrapping}>
-            <TextInput
-              value={password}
-              onChangeText={value => setPassword(value)}
-              placeholder="Enter your Password"
-              placeholderTextColor="rgba(0, 0, 0, 0.75)"
-              secureTextEntry={!showPassword}
-              style={styles.passwordTextInput}
+          <TouchableOpacity
+            style={styles.showPasswordTouch}
+            onPress={showPasswordHandler}>
+            <Image
+              source={
+                showPassword
+                  ? require('../assets/hide.png')
+                  : require('../assets/view.png')
+              }
+              style={styles.eyeImage}
             />
-            <TouchableOpacity
-              style={styles.showPasswordTouch}
-              onPress={showPasswordHandler}>
-              <Image
-                source={
-                  showPassword
-                    ? require('../assets/hide.png')
-                    : require('../assets/view.png')
-                }
-                style={styles.eyeImage}
-              />
-            </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity onPress={() => {}} style={styles.forgotPassword}>
           <Text style={styles.forgotPasswordText}>Forgot Password ?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Dashboard')}>
-          <View style={styles.loginButton}>
-            <Text style={styles.loginText}>Login</Text>
-          </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Dashboard')}
+          style={styles.loginButton}>
+          <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
 
         <View style={styles.dontHaveAccountWrapping}>
@@ -98,15 +101,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  backgroundWrapping: {
-    position: 'absolute',
-  },
   background: {
-    height: deviceHeight,
-    width: deviceWidth,
+    height: deviceHeight / 5,
+    width: deviceWidth / 2,
   },
   contentWrapping: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -114,7 +113,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#000000',
     fontWeight: 'bold',
-    marginBottom: 13,
+    marginBottom: hp('2%'),
   },
   emailTextInput: {
     width: 306,
@@ -122,14 +121,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#D8D8D8',
     color: 'black',
     fontSize: 14,
-    marginTop: 20,
+    marginBottom: hp('2%'),
     borderRadius: 27,
     paddingLeft: 34,
     paddingRight: 20,
     fontWeight: '400',
   },
   passwordWrapping: {
-    marginTop: 18,
+    marginBottom: hp('1%'),
   },
   passwordTextInput: {
     backgroundColor: '#D8D8D8',
@@ -140,6 +139,7 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     fontWeight: '400',
     height: 54,
+    width: 306,
   },
   showPasswordTouch: {
     position: 'absolute',
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     width: 20,
   },
   forgotPassword: {
-    marginTop: 18,
+    marginTop: hp('1%'),
   },
   forgotPasswordText: {
     fontSize: 14,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: 306,
     height: 83,
-    marginTop: 6,
+    marginTop: hp('1%'),
     borderRadius: 10,
   },
   loginText: {
@@ -176,15 +176,14 @@ const styles = StyleSheet.create({
   dontHaveAccountWrapping: {
     flexDirection: 'row',
     justifyContent: 'center',
-    alignSelf: 'center',
-    marginTop: 8,
+    alignItems: 'center',
+    marginTop: hp('1%'),
   },
   dontHaveAccountText: {
     fontSize: 14,
     fontWeight: '400',
     color: 'rgba(0, 0, 0, 0.75)',
     textAlign: 'center',
-    justifyContent: 'center',
   },
   signUpText: {
     fontSize: 14,
@@ -194,4 +193,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignInPage;
+export default SignInPage2;

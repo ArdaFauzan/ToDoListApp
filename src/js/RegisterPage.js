@@ -14,6 +14,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
+import Axios from 'axios';
 
 const RegisterPage2 = ({navigation}) => {
   const [name, setName] = useState('');
@@ -24,6 +25,35 @@ const RegisterPage2 = ({navigation}) => {
 
   const showPasswordHandler = () => {
     setShowPassword(!showPassword);
+  };
+
+  const createNewUser = async () => {
+    const data = {
+      name,
+      email,
+      password,
+      passwordConfirm: confirmPassword,
+    };
+
+    try {
+      await Axios.post(
+        'https://to-do-list-app-back-end.vercel.app/todo/register',
+        data,
+      ).then(response => {
+        console.log(response.data);
+        navigation.navigate('SignInPage');
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const registerHandler = () => {
+    if (password !== confirmPassword) {
+      console.warn('Password do not match');
+    } else {
+      createNewUser();
+    }
   };
 
   return (
@@ -91,7 +121,7 @@ const RegisterPage2 = ({navigation}) => {
         />
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('SignInPage')}
+          onPress={registerHandler}
           style={styles.buttonWrapping}>
           <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
