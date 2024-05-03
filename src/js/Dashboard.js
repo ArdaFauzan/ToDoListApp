@@ -18,18 +18,25 @@ import Clock from './Clock';
 import Axios from 'axios';
 import Plus from '../assets/plus.svg';
 import Trash from '../assets/trash.svg';
+import Camera from '../assets/camerauser.svg';
 import ToDo from './ToDo';
 import AddToDo from './AddToDo';
+import * as Progress from 'react-native-progress';
 
-const Dashboard2 = () => {
+const Dashboard2 = ({route}) => {
   const [todos, setTodos] = useState([]);
   const [showAddToDo, setShowAddToDo] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [checkedIds, setCheckedIds] = useState([]);
+  const [name, setName] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const {email} = route.params;
 
   useEffect(() => {
     getData();
+    getNameHandler();
   }, []);
 
   const getData = async () => {
@@ -38,6 +45,7 @@ const Dashboard2 = () => {
         'https://to-do-list-app-back-end.vercel.app/todo/gettodo',
       );
       setTodos(response.data.data);
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
@@ -85,7 +93,7 @@ const Dashboard2 = () => {
   };
 
   const showAddToDoComponent = () => {
-    setShowAddToDo(true);
+    setShowAddToDo(prev => !prev);
   };
 
   const renderItem = ({item}) => (
@@ -102,6 +110,17 @@ const Dashboard2 = () => {
     />
   );
 
+  const getNameHandler = () => {
+    Axios.get(
+      `https://to-do-list-app-back-end.vercel.app/todo/getusername/${email}`,
+    )
+      .then(res => {
+        const [user] = res.data.data;
+        setName(user);
+      })
+      .catch(err => console.log(err));
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -110,58 +129,72 @@ const Dashboard2 = () => {
         backgroundColor={'transparent'}
       />
 
-      <KeyboardAvoidingView behavior="position">
-        <ImageBackground
-          source={require('../assets/bgdashboard.png')}
-          style={styles.background}>
-          <View style={styles.welcomeWrapping}>
-            <Image
-              source={require('../assets/photo.jpeg')}
-              style={styles.userImage}
-            />
-
-            <Text style={styles.welcomeText}>Welcome Arda!</Text>
-          </View>
-        </ImageBackground>
-
-        <View>
-          <Text style={styles.greetingText}>Good Morning</Text>
-          <Clock />
-          <Text style={styles.taskListText}>Tasks List</Text>
-
-          <View style={styles.toDoContainer}>
-            <View style={styles.dailyTaskWrapping}>
-              <Text style={styles.dailyTaskText}>
-                {isDeleteMode ? 'Pilih Item' : 'Daily Tasks'}
-              </Text>
-
-              <TouchableOpacity
-                style={styles.plusWrapping}
-                onPress={
-                  isDeleteMode ? handleDeleteChecked : showAddToDoComponent
-                }>
-                {isDeleteMode ? (
-                  <Trash width={28} height={28} />
-                ) : (
-                  <Plus width={29} height={28} />
-                )}
-              </TouchableOpacity>
-            </View>
-
-            <FlatList
-              data={todos}
-              renderItem={renderItem}
-              keyExtractor={item => item.id.toString()}
-              style={styles.toDo}
-              ListHeaderComponent={
-                showAddToDo ? (
-                  <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
-                ) : null
-              }
-            />
-          </View>
+      {loading ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Progress.CircleSnail thickness={8} size={100} color={'#50C2C9'} />
         </View>
-      </KeyboardAvoidingView>
+      ) : (
+        <KeyboardAvoidingView behavior="position">
+          <ImageBackground
+            source={require('../assets/bgdashboard.png')}
+            style={styles.background}>
+            <View style={styles.welcomeWrapping}>
+              <View style={{flexDirection: 'row'}}>
+                <Image
+                  source={require('../assets/user.png')}
+                  style={styles.userImage}
+                />
+
+                <TouchableOpacity
+                  onPress={() => {}}
+                  style={{position: 'absolute', right: 30, top: 70, left: 80}}>
+                  <Camera height={35} width={35} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.welcomeText}>Welcome {name.name}!</Text>
+            </View>
+          </ImageBackground>
+
+          <View>
+            <Text style={styles.greetingText}>Good Morning</Text>
+            <Clock />
+            <Text style={styles.taskListText}>Tasks List</Text>
+
+            <View style={styles.toDoContainer}>
+              <View style={styles.dailyTaskWrapping}>
+                <Text style={styles.dailyTaskText}>
+                  {isDeleteMode ? 'Pilih Item' : 'Daily Tasks'}
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.plusWrapping}
+                  onPress={
+                    isDeleteMode ? handleDeleteChecked : showAddToDoComponent
+                  }>
+                  {isDeleteMode ? (
+                    <Trash width={28} height={28} />
+                  ) : (
+                    <Plus width={29} height={28} />
+                  )}
+                </TouchableOpacity>
+              </View>
+
+              <FlatList
+                data={todos}
+                renderItem={renderItem}
+                keyExtractor={item => item.id.toString()}
+                style={styles.toDo}
+                ListHeaderComponent={
+                  showAddToDo ? (
+                    <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
+                  ) : null
+                }
+              />
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      )}
     </View>
   );
 };
@@ -176,9 +209,8 @@ const styles = StyleSheet.create({
   },
   welcomeWrapping: {
     justifyContent: 'center',
-    flex: 1,
     alignItems: 'center',
-    marginTop: hp('8%'),
+    marginTop: hp('9%'),
   },
   userImage: {
     height: 110,

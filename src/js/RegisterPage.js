@@ -8,13 +8,14 @@ import {
   StatusBar,
   ImageBackground,
   Image,
+  Alert,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
-import Axios from 'axios';
+import Axios, {all} from 'axios';
 
 const RegisterPage2 = ({navigation}) => {
   const [name, setName] = useState('');
@@ -40,11 +41,11 @@ const RegisterPage2 = ({navigation}) => {
         'https://to-do-list-app-back-end.vercel.app/todo/register',
         data,
       ).then(response => {
-        console.log(response.data);
+        Alert.alert('Warning!', 'Sign up success, Please log in again');
         navigation.navigate('SignInPage');
       });
     } catch (error) {
-      console.error(error);
+      Alert.alert('Warning!', 'Email already in use');
     }
   };
 

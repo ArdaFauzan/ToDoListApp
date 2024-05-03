@@ -8,6 +8,7 @@ import {
   Image,
   Text,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -15,6 +16,7 @@ import {
 } from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 import SignInImage from '../assets/signinimage.svg';
+import Axios from 'axios';
 
 const SignInPage2 = ({navigation}) => {
   const [signIn, setSignIn] = useState('');
@@ -23,6 +25,26 @@ const SignInPage2 = ({navigation}) => {
 
   const showPasswordHandler = () => {
     setShowPassword(!showPassword);
+  };
+
+  const loginHandler = () => {
+    const data = {
+      email: signIn,
+      password,
+    };
+
+    Axios.post('https://to-do-list-app-back-end.vercel.app/todo/login', data)
+      .then(response => {
+        Alert.alert('Warning!', 'Login success', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('Dashboard', {email: signIn}),
+          },
+        ]);
+      })
+      .catch(error => {
+        Alert.alert('Warning!', 'Email or Password is wrong!');
+      });
   };
 
   return (
@@ -80,9 +102,7 @@ const SignInPage2 = ({navigation}) => {
           <Text style={styles.forgotPasswordText}>Forgot Password ?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Dashboard')}
-          style={styles.loginButton}>
+        <TouchableOpacity onPress={loginHandler} style={styles.loginButton}>
           <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
 
