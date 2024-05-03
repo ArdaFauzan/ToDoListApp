@@ -25,6 +25,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 100,
+    },
+    shadowOpacity: 1.9,
+    shadowRadius: 40,
+    elevation: 20,
   },
 });
 

@@ -18,7 +18,7 @@ import {deviceHeight, deviceWidth} from './Dimension';
 import SignInImage from '../assets/signinimage.svg';
 import Axios from 'axios';
 
-const SignInPage2 = ({navigation}) => {
+const SignInPage = ({navigation}) => {
   const [signIn, setSignIn] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -213,4 +213,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignInPage2;
+export default SignInPage;

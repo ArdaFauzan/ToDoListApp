@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,8 @@ import {
   FlatList,
   KeyboardAvoidingView,
   StyleSheet,
+  Modal,
+  BackHandler,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -22,8 +24,9 @@ import Camera from '../assets/camerauser.svg';
 import ToDo from './ToDo';
 import AddToDo from './AddToDo';
 import * as Progress from 'react-native-progress';
+import AddPhoto from './AddPhoto';
 
-const Dashboard2 = ({route}) => {
+const Dashboard = ({route}) => {
   const [todos, setTodos] = useState([]);
   const [showAddToDo, setShowAddToDo] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -31,13 +34,29 @@ const Dashboard2 = ({route}) => {
   const [checkedIds, setCheckedIds] = useState([]);
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const {email} = route.params;
+
+  const onBackPress = useCallback(() => {
+    if (isDeleteMode) {
+      setIsDeleteMode(false);
+      return true;
+    }
+
+    return false;
+  }, [isDeleteMode]);
 
   useEffect(() => {
     getData();
     getNameHandler();
-  }, []);
+
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    };
+  }, [onBackPress]);
 
   const getData = async () => {
     try {
@@ -121,12 +140,27 @@ const Dashboard2 = ({route}) => {
       .catch(err => console.log(err));
   };
 
+  const handleCameraClick = () => {
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <AddPhoto
+          isVisible={modalVisible}
+          onClose={() => setModalVisible(false)}
+        />
+      </Modal>
+
       <StatusBar
         translucent
         barStyle={'dark-content'}
-        backgroundColor={'transparent'}
+        backgroundColor={modalVisible ? 'rgba(0, 0, 0, 0.5)' : 'transparent'}
       />
 
       {loading ? (
@@ -139,19 +173,18 @@ const Dashboard2 = ({route}) => {
             source={require('../assets/bgdashboard.png')}
             style={styles.background}>
             <View style={styles.welcomeWrapping}>
-              <View style={{flexDirection: 'row'}}>
+              <View>
                 <Image
                   source={require('../assets/user.png')}
                   style={styles.userImage}
                 />
 
                 <TouchableOpacity
-                  onPress={() => {}}
+                  onPress={handleCameraClick}
                   style={{position: 'absolute', right: 30, top: 70, left: 80}}>
                   <Camera height={35} width={35} />
                 </TouchableOpacity>
               </View>
-
               <Text style={styles.welcomeText}>Welcome {name.name}!</Text>
             </View>
           </ImageBackground>
@@ -164,7 +197,7 @@ const Dashboard2 = ({route}) => {
             <View style={styles.toDoContainer}>
               <View style={styles.dailyTaskWrapping}>
                 <Text style={styles.dailyTaskText}>
-                  {isDeleteMode ? 'Pilih Item' : 'Daily Tasks'}
+                  {isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
                 </Text>
 
                 <TouchableOpacity
@@ -269,4 +302,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Dashboard2;
+export default Dashboard;

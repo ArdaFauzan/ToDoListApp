@@ -10,14 +10,11 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
-import Axios, {all} from 'axios';
+import Axios from 'axios';
 
-const RegisterPage2 = ({navigation}) => {
+const RegisterPage = ({navigation}) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -231,4 +228,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RegisterPage2;
+export default RegisterPage;

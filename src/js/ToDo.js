@@ -6,6 +6,7 @@ import {
   View,
   TextInput,
   StyleSheet,
+  Vibration,
 } from 'react-native';
 import BoxFull from '../assets/box_full.png';
 import Box from '../assets/box.png';
@@ -49,6 +50,8 @@ const ToDo = ({
   };
 
   const handleLongPress = () => {
+    const DURATION = 100;
+    Vibration.vibrate(DURATION);
     onActivateDeleteMode();
   };
 
