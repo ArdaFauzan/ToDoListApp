@@ -25,6 +25,7 @@ import ToDo from './ToDo';
 import AddToDo from './AddToDo';
 import * as Progress from 'react-native-progress';
 import AddPhoto from './AddPhoto';
+import {BASE_API} from './API';
 
 const Dashboard = ({route}) => {
   const [todos, setTodos] = useState([]);
@@ -35,6 +36,7 @@ const Dashboard = ({route}) => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [userImageUri, setUserImageUri] = useState('');
 
   const {email} = route.params;
 
@@ -48,23 +50,24 @@ const Dashboard = ({route}) => {
   }, [isDeleteMode]);
 
   useEffect(() => {
-    getData();
     getNameHandler();
+    if (name) {
+      getData();
+    }
 
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     };
-  }, [onBackPress]);
+  }, [onBackPress, name]);
 
   const getData = async () => {
     try {
-      const response = await Axios.get(
-        'https://to-do-list-app-back-end.vercel.app/todo/gettodo',
-      );
-      setTodos(response.data.data);
-      setLoading(false);
+      await Axios.get(`${BASE_API}/gettodo/${name}`).then(res => {
+        setTodos(res.data.data);
+        setLoading(false);
+      });
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
@@ -81,10 +84,7 @@ const Dashboard = ({route}) => {
     };
 
     try {
-      await Axios.put(
-        `https://to-do-list-app-back-end.vercel.app/todo/updatetodo/${id}`,
-        data,
-      );
+      await Axios.put(`${BASE_API}/updatetodo/${id}`, data);
       getData();
       setEditingId(null);
     } catch (error) {
@@ -92,15 +92,11 @@ const Dashboard = ({route}) => {
     }
   };
 
-  const handleDeleteChecked = async () => {
+  const deleteCheckedHandler = async () => {
     if (checkedIds.length > 0) {
       try {
         await Promise.all(
-          checkedIds.map(id =>
-            Axios.delete(
-              `https://to-do-list-app-back-end.vercel.app/todo/deletetodo/${id}`,
-            ),
-          ),
+          checkedIds.map(id => Axios.delete(`${BASE_API}/deletetodo/${id}`)),
         );
         getData();
         setIsDeleteMode(false);
@@ -111,38 +107,42 @@ const Dashboard = ({route}) => {
     }
   };
 
-  const showAddToDoComponent = () => {
-    setShowAddToDo(prev => !prev);
-  };
-
   const renderItem = ({item}) => (
     <ToDo
-      list={item}
-      onGet={getData}
+      list={item} //v
+      onGet={getData} //v
       onEdit={handleEdit}
       onSave={handleSave}
       isEditing={editingId === item.id}
       isDeleteMode={isDeleteMode}
       onActivateDeleteMode={() => setIsDeleteMode(true)}
-      checkedIds={checkedIds}
+      checkedIds={checkedIds} //v
       setCheckedIds={setCheckedIds}
     />
   );
 
-  const getNameHandler = () => {
-    Axios.get(
-      `https://to-do-list-app-back-end.vercel.app/todo/getusername/${email}`,
-    )
-      .then(res => {
-        const [user] = res.data.data;
-        setName(user);
-      })
-      .catch(err => console.log(err));
+  const getNameHandler = async () => {
+    try {
+      const res = await Axios.get(`${BASE_API}/getusername/${email}`);
+      const [user] = res.data.data;
+      setName(user.name);
+    } catch (err) {
+      console.error('Error fetching name:', err);
+    }
   };
 
   const handleCameraClick = () => {
     setModalVisible(true);
   };
+
+  // const getPhotoUser = () => {
+  //   Axios.get(
+  //     `https://to-do-list-app-back-end.vercel.app/todo/getphoto/${name}`,
+  //   ).then(res => {
+  //     console.log(res);
+  //     setUserImageUri(res.imageurl);
+  //   });
+  // };
 
   return (
     <View style={styles.container}>
@@ -154,6 +154,7 @@ const Dashboard = ({route}) => {
         <AddPhoto
           isVisible={modalVisible}
           onClose={() => setModalVisible(false)}
+          setUserImageUri={setUserImageUri}
         />
       </Modal>
 
@@ -175,7 +176,11 @@ const Dashboard = ({route}) => {
             <View style={styles.welcomeWrapping}>
               <View>
                 <Image
-                  source={require('../assets/user.png')}
+                  source={
+                    userImageUri
+                      ? {uri: userImageUri}
+                      : require('../assets/user.png')
+                  }
                   style={styles.userImage}
                 />
 
@@ -185,7 +190,7 @@ const Dashboard = ({route}) => {
                   <Camera height={35} width={35} />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.welcomeText}>Welcome {name.name}!</Text>
+              <Text style={styles.welcomeText}>Welcome {name}!</Text>
             </View>
           </ImageBackground>
 
@@ -203,7 +208,7 @@ const Dashboard = ({route}) => {
                 <TouchableOpacity
                   style={styles.plusWrapping}
                   onPress={
-                    isDeleteMode ? handleDeleteChecked : showAddToDoComponent
+                    isDeleteMode ? deleteCheckedHandler : toggleShowAddToDo
                   }>
                   {isDeleteMode ? (
                     <Trash width={28} height={28} />
@@ -220,7 +225,11 @@ const Dashboard = ({route}) => {
                 style={styles.toDo}
                 ListHeaderComponent={
                   showAddToDo ? (
-                    <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
+                    <AddToDo
+                      onGet={getData}
+                      onClose={toggleShowAddToDo}
+                      name={name}
+                    />
                   ) : null
                 }
               />

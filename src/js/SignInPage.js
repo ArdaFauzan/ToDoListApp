@@ -10,13 +10,11 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 import SignInImage from '../assets/signinimage.svg';
 import Axios from 'axios';
+import {API_Login, BASE_API} from './API';
 
 const SignInPage = ({navigation}) => {
   const [signIn, setSignIn] = useState('');
@@ -27,14 +25,14 @@ const SignInPage = ({navigation}) => {
     setShowPassword(!showPassword);
   };
 
-  const loginHandler = () => {
+  const loginHandler = async () => {
     const data = {
       email: signIn,
       password,
     };
 
-    Axios.post('https://to-do-list-app-back-end.vercel.app/todo/login', data)
-      .then(response => {
+    await Axios.post(`${BASE_API}/login`, data)
+      .then(res => {
         Alert.alert('Warning!', 'Login success', [
           {
             text: 'OK',
@@ -70,7 +68,7 @@ const SignInPage = ({navigation}) => {
         <TextInput
           value={signIn}
           onChangeText={value => setSignIn(value)}
-          placeholder="Enter your Email or Name"
+          placeholder="Enter your Email"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
           style={styles.emailTextInput}
         />

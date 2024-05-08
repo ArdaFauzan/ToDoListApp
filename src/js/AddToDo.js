@@ -3,8 +3,9 @@ import {View, TouchableOpacity, TextInput, StyleSheet} from 'react-native';
 import Axios from 'axios';
 import Check from '../assets/check.svg';
 import Close from '../assets/close.svg';
+import {BASE_API} from './API';
 
-const AddToDo = ({onGet, onClose}) => {
+const AddToDo = ({onGet, onClose, name}) => {
   const [newToDo, setNewToDo] = useState('');
 
   const postData = () => {
@@ -15,10 +16,7 @@ const AddToDo = ({onGet, onClose}) => {
     };
 
     if (newToDo) {
-      Axios.post(
-        'https://to-do-list-app-back-end.vercel.app/todo/createtodo',
-        data,
-      )
+      Axios.post(`${BASE_API}/createtodo/${name}`, data)
         .then(res => {
           setNewToDo('');
           onGet();

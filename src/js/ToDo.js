@@ -14,6 +14,7 @@ import Axios from 'axios';
 import Check from '../assets/check.svg';
 import Close from '../assets/close.svg';
 import CheckBox from '@react-native-community/checkbox';
+import {BASE_API} from './API';
 
 const ToDo = ({
   list,
@@ -29,24 +30,23 @@ const ToDo = ({
   const [completed, setCompleted] = useState(list.completed);
   const [editText, setEditText] = useState(list.todo);
 
-  const putCompleted = () => {
+  const completedHandler = () => {
     const newCompleted = !completed;
     setCompleted(newCompleted);
-    updateTodo(newCompleted);
+
+    updateCompleted(list.id);
   };
 
-  const updateTodo = newCompleted => {
+  const updateCompleted = async id => {
     const data = {
-      todo: editText,
-      completed: newCompleted,
+      todo: list.todo,
+      completed: completed,
     };
-
-    Axios.put(
-      `https://to-do-list-app-back-end.vercel.app/todo/${list.id}`,
-      data,
-    ).then(() => {
-      onGet();
-    });
+    try {
+      await Axios.put(`${BASE_API}/updatetodo/${id}`, data);
+    } catch (error) {
+      console.error('Error updating data: ', error);
+    }
   };
 
   const handleLongPress = () => {
@@ -55,7 +55,7 @@ const ToDo = ({
     onActivateDeleteMode();
   };
 
-  const handleCheckboxChange = (id, isChecked) => {
+  const checkBoxHandler = (id, isChecked) => {
     if (isChecked) {
       setCheckedIds(prevIds => [...prevIds, id]);
     } else {
@@ -65,7 +65,7 @@ const ToDo = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={putCompleted}>
+      <TouchableOpacity onPress={completedHandler}>
         <Image
           source={completed ? BoxFull : Box}
           style={styles.completedImage}
@@ -115,9 +115,7 @@ const ToDo = ({
             <View style={styles.checkBoxWrapping}>
               <CheckBox
                 value={checkedIds.includes(list.id)}
-                onValueChange={newValue =>
-                  handleCheckboxChange(list.id, newValue)
-                }
+                onValueChange={newValue => checkBoxHandler(list.id, newValue)}
                 tintColors={('#787878', '#494949')}
                 style={styles.checkBox}
               />

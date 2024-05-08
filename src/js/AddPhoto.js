@@ -11,31 +11,19 @@ import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Camera from '../assets/camera.svg';
 import Gallery from '../assets/gallery.svg';
 import Trash from '../assets/trashPhoto.svg';
+import Axios from 'axios';
 
-const AddPhoto = ({onClose}) => {
+const AddPhoto = ({onClose, setUserImageUri}) => {
   const [imageUri, setImageUri] = useState('');
 
-  const handleChoosePhoto = () => {
-    launchImageLibrary({noData: true}, response => {
-      if (response) {
-        const uri = response.uri;
-        // Simpan gambar di penyimpanan lokal dan dapatkan URI-nya
-        const localImageUri = saveImageToLocal(uri);
-        // Set URI gambar ke state untuk ditampilkan
-        setImageUri(localImageUri);
-      }
+  const postPhotoUser = () => {
+    Axios.post(
+      `https://to-do-list-app-back-end.vercel.app/todo/uploadphoto/${name}`,
+    ).then(res => {
+      console.log(res);
     });
   };
 
-  const saveImageToLocal = uri => {
-    const dirs = RNFetchBlob.fs.dirs;
-    const localPath = `${dirs.DocumentDir}/local-image.jpg`;
-    RNFetchBlob.fs
-      .cp(uri, localPath)
-      .then(() => console.log('Gambar disimpan di penyimpanan lokal'))
-      .catch(error => console.error(error));
-    return localPath;
-  };
   return (
     <TouchableWithoutFeedback onPress={onClose}>
       <View
@@ -82,7 +70,7 @@ const AddPhoto = ({onClose}) => {
               <Camera width={60} height={60} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleChoosePhoto}>
+            <TouchableOpacity onPress={() => {}}>
               <Gallery width={60} height={60} />
             </TouchableOpacity>
 

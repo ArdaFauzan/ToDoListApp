@@ -13,6 +13,7 @@ import {
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 import Axios from 'axios';
+import {API_createNewUser, BASE_API} from './API';
 
 const RegisterPage = ({navigation}) => {
   const [name, setName] = useState('');
@@ -34,10 +35,7 @@ const RegisterPage = ({navigation}) => {
     };
 
     try {
-      await Axios.post(
-        'https://to-do-list-app-back-end.vercel.app/todo/register',
-        data,
-      ).then(response => {
+      await Axios.post(`${BASE_API}/register`, data).then(res => {
         Alert.alert('Warning!', 'Sign up success, Please log in again');
         navigation.navigate('SignInPage');
       });
