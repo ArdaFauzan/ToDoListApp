@@ -14,21 +14,33 @@ import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 import SignInImage from '../assets/signinimage.svg';
 import Axios from 'axios';
-import {API_Login, BASE_API} from './API';
+import {BASE_API} from './API';
 
 const SignInPage = ({navigation}) => {
-  const [signIn, setSignIn] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [state, setState] = useState({
+    signIn: '',
+    password: '',
+    showPassword: false,
+  });
+  // const [signIn, setSignIn] = useState('');
+  // const [password, setPassword] = useState('');
+  // const [showPassword, setShowPassword] = useState(false);
+
+  const updateState = (key, value) => {
+    setState(prevState => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
 
   const showPasswordHandler = () => {
-    setShowPassword(!showPassword);
+    updateState('showPassword', !state.showPassword);
   };
 
   const loginHandler = async () => {
     const data = {
-      email: signIn,
-      password,
+      email: state.signIn,
+      password: state.password,
     };
 
     await Axios.post(`${BASE_API}/login`, data)
@@ -36,7 +48,8 @@ const SignInPage = ({navigation}) => {
         Alert.alert('Warning!', 'Login success', [
           {
             text: 'OK',
-            onPress: () => navigation.navigate('Dashboard', {email: signIn}),
+            onPress: () =>
+              navigation.navigate('Dashboard', {email: state.signIn}),
           },
         ]);
       })
@@ -66,8 +79,8 @@ const SignInPage = ({navigation}) => {
         </View>
 
         <TextInput
-          value={signIn}
-          onChangeText={value => setSignIn(value)}
+          value={state.signIn}
+          onChangeText={value => updateState('signIn', value)}
           placeholder="Enter your Email"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
           style={styles.emailTextInput}
@@ -75,11 +88,11 @@ const SignInPage = ({navigation}) => {
 
         <View style={styles.passwordWrapping}>
           <TextInput
-            value={password}
-            onChangeText={value => setPassword(value)}
+            value={state.password}
+            onChangeText={value => updateState('password', value)}
             placeholder="Enter your Password"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            secureTextEntry={!showPassword}
+            secureTextEntry={!state.showPassword}
             style={styles.passwordTextInput}
           />
           <TouchableOpacity
@@ -87,7 +100,7 @@ const SignInPage = ({navigation}) => {
             onPress={showPasswordHandler}>
             <Image
               source={
-                showPassword
+                state.showPassword
                   ? require('../assets/hide.png')
                   : require('../assets/view.png')
               }

@@ -13,25 +13,39 @@ import {
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from './Dimension';
 import Axios from 'axios';
-import {API_createNewUser, BASE_API} from './API';
+import {BASE_API} from './API';
 
 const RegisterPage = ({navigation}) => {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [state, setState] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    showPassword: false,
+  });
+  // const [name, setName] = useState('');
+  // const [email, setEmail] = useState('');
+  // const [password, setPassword] = useState('');
+  // const [confirmPassword, setConfirmPassword] = useState('');
+  // const [showPassword, setShowPassword] = useState(false);
+
+  const updateState = (key, value) => {
+    setState(prevState => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
 
   const showPasswordHandler = () => {
-    setShowPassword(!showPassword);
+    updateState('showPassword', !state.showPassword);
   };
 
   const createNewUser = async () => {
     const data = {
-      name,
-      email,
-      password,
-      passwordConfirm: confirmPassword,
+      name: state.name,
+      email: state.email,
+      password: state.password,
+      passwordConfirm: state.confirmPassword,
     };
 
     try {
@@ -45,7 +59,7 @@ const RegisterPage = ({navigation}) => {
   };
 
   const registerHandler = () => {
-    if (password !== confirmPassword) {
+    if (state.password !== state.confirmPassword) {
       console.warn('Password do not match');
     } else {
       createNewUser();
@@ -70,15 +84,15 @@ const RegisterPage = ({navigation}) => {
         <Text style={styles.descText}>Let’s checkup your tasks!</Text>
 
         <TextInput
-          value={name}
-          onChangeText={value => setName(value)}
+          value={state.name}
+          onChangeText={value => updateState('name', value)}
           placeholder="Enter your Name"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
           style={styles.textInput}
         />
         <TextInput
-          value={email}
-          onChangeText={value => setEmail(value)}
+          value={state.email}
+          onChangeText={value => updateState('email', value)}
           placeholder="Enter your Email"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
           style={styles.textInput}
@@ -86,11 +100,11 @@ const RegisterPage = ({navigation}) => {
 
         <View style={styles.passwordTextInputWrapping}>
           <TextInput
-            value={password}
-            onChangeText={value => setPassword(value)}
+            value={state.password}
+            onChangeText={value => updateState('password', value)}
             placeholder="Enter your Password"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            secureTextEntry={!showPassword}
+            secureTextEntry={!state.showPassword}
             style={styles.passwordTextInput}
           />
           <TouchableOpacity
@@ -98,7 +112,7 @@ const RegisterPage = ({navigation}) => {
             onPress={showPasswordHandler}>
             <Image
               source={
-                showPassword
+                state.showPassword
                   ? require('../assets/hide.png')
                   : require('../assets/view.png')
               }
@@ -108,8 +122,8 @@ const RegisterPage = ({navigation}) => {
         </View>
 
         <TextInput
-          value={confirmPassword}
-          onChangeText={value => setConfirmPassword(value)}
+          value={state.confirmPassword}
+          onChangeText={value => updateState('confirmPassword', value)}
           placeholder="Confirm your Password"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
           secureTextEntry={true}
