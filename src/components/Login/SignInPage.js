@@ -1,32 +1,29 @@
 import React, {useState} from 'react';
 import {
+  ImageBackground,
   View,
-  Text,
+  StatusBar,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  StatusBar,
-  ImageBackground,
   Image,
+  Text,
+  StyleSheet,
   Alert,
 } from 'react-native';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import {deviceHeight, deviceWidth} from './Dimension';
+import {deviceHeight, deviceWidth} from '../Utils/Dimension';
+import SignInImage from '../../assets/signinimage.svg';
 import Axios from 'axios';
-import {BASE_API} from './API';
+import {BASE_API} from '../Utils/API';
 
-const RegisterPage = ({navigation}) => {
+const SignInPage = ({navigation}) => {
   const [state, setState] = useState({
-    name: '',
-    email: '',
+    signIn: '',
     password: '',
-    confirmPassword: '',
     showPassword: false,
   });
-  // const [name, setName] = useState('');
-  // const [email, setEmail] = useState('');
+  // const [signIn, setSignIn] = useState('');
   // const [password, setPassword] = useState('');
-  // const [confirmPassword, setConfirmPassword] = useState('');
   // const [showPassword, setShowPassword] = useState(false);
 
   const updateState = (key, value) => {
@@ -40,30 +37,25 @@ const RegisterPage = ({navigation}) => {
     updateState('showPassword', !state.showPassword);
   };
 
-  const createNewUser = async () => {
+  const loginHandler = async () => {
     const data = {
-      name: state.name,
-      email: state.email,
+      email: state.signIn,
       password: state.password,
-      passwordConfirm: state.confirmPassword,
     };
 
-    try {
-      await Axios.post(`${BASE_API}/register`, data).then(res => {
-        Alert.alert('Warning!', 'Sign up success, Please log in again');
-        navigation.navigate('SignInPage');
+    await Axios.post(`${BASE_API}/login`, data)
+      .then(res => {
+        Alert.alert('Warning!', 'Login success', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('Dashboard', {email: state.signIn}),
+          },
+        ]);
+      })
+      .catch(error => {
+        Alert.alert('Warning!', 'Email or Password is wrong!');
       });
-    } catch (error) {
-      Alert.alert('Warning!', 'Email already in use');
-    }
-  };
-
-  const registerHandler = () => {
-    if (state.password !== state.confirmPassword) {
-      console.warn('Password do not match');
-    } else {
-      createNewUser();
-    }
   };
 
   return (
@@ -75,30 +67,26 @@ const RegisterPage = ({navigation}) => {
       />
 
       <ImageBackground
-        source={require('../assets/Elipse.png')}
+        source={require('../../assets/Elipse.png')}
         style={styles.background}
       />
 
       <View style={styles.contentWrapping}>
-        <Text style={styles.tittleText}>Welcome OnBoard !</Text>
-        <Text style={styles.descText}>Let’s checkup your tasks!</Text>
+        <Text style={styles.tittleText}>Welcome Back!</Text>
+
+        <View style={{marginBottom: hp('2%')}}>
+          <SignInImage height={152} width={153} />
+        </View>
 
         <TextInput
-          value={state.name}
-          onChangeText={value => updateState('name', value)}
-          placeholder="Enter your Name"
-          placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          style={styles.textInput}
-        />
-        <TextInput
-          value={state.email}
-          onChangeText={value => updateState('email', value)}
+          value={state.signIn}
+          onChangeText={value => updateState('signIn', value)}
           placeholder="Enter your Email"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          style={styles.textInput}
+          style={styles.emailTextInput}
         />
 
-        <View style={styles.passwordTextInputWrapping}>
+        <View style={styles.passwordWrapping}>
           <TextInput
             value={state.password}
             onChangeText={value => updateState('password', value)}
@@ -113,36 +101,26 @@ const RegisterPage = ({navigation}) => {
             <Image
               source={
                 state.showPassword
-                  ? require('../assets/hide.png')
-                  : require('../assets/view.png')
+                  ? require('../../assets/hide.png')
+                  : require('../../assets/view.png')
               }
               style={styles.eyeImage}
             />
           </TouchableOpacity>
         </View>
 
-        <TextInput
-          value={state.confirmPassword}
-          onChangeText={value => updateState('confirmPassword', value)}
-          placeholder="Confirm your Password"
-          placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          secureTextEntry={true}
-          style={styles.textInput}
-        />
-
-        <TouchableOpacity
-          onPress={registerHandler}
-          style={styles.buttonWrapping}>
-          <Text style={styles.buttonText}>Get Started</Text>
+        <TouchableOpacity onPress={() => {}} style={styles.forgotPassword}>
+          <Text style={styles.forgotPasswordText}>Forgot Password ?</Text>
         </TouchableOpacity>
 
-        <View style={styles.alreadyAccountWrapping}>
-          <Text style={styles.alreadyAccountText}>
-            Already have a account ?
-          </Text>
+        <TouchableOpacity onPress={loginHandler} style={styles.loginButton}>
+          <Text style={styles.loginText}>Login</Text>
+        </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('SignInPage')}>
-            <Text style={styles.signInText}> Sign In</Text>
+        <View style={styles.dontHaveAccountWrapping}>
+          <Text style={styles.dontHaveAccountText}>Don’t have a account ?</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('RegisterPage')}>
+            <Text style={styles.signUpText}> Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -154,26 +132,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  contentWrapping: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   background: {
     height: deviceHeight / 5,
     width: deviceWidth / 2,
+  },
+  contentWrapping: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   tittleText: {
     fontSize: 20,
     color: '#000000',
     fontWeight: 'bold',
+    marginBottom: hp('2%'),
   },
-  descText: {
-    fontSize: 14,
-    color: '#000000',
-    fontWeight: '400',
-    marginBottom: hp('1%'),
-  },
-  textInput: {
+  emailTextInput: {
     width: 306,
     height: 54,
     backgroundColor: '#D8D8D8',
@@ -185,19 +158,19 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     fontWeight: '400',
   },
-  passwordTextInputWrapping: {
-    marginBottom: hp('2%'),
+  passwordWrapping: {
+    marginBottom: hp('1%'),
   },
   passwordTextInput: {
-    width: 306,
-    height: 54,
     backgroundColor: '#D8D8D8',
     color: 'black',
     fontSize: 14,
     borderRadius: 27,
     paddingLeft: 34,
-    paddingRight: 50,
+    paddingRight: 20,
     fontWeight: '400',
+    height: 54,
+    width: 306,
   },
   showPasswordTouch: {
     position: 'absolute',
@@ -208,36 +181,47 @@ const styles = StyleSheet.create({
     height: 20,
     width: 20,
   },
-  buttonWrapping: {
+  forgotPassword: {
+    marginTop: hp('1%'),
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: 'rgba(0, 112, 112, 0.75)',
+  },
+  loginButton: {
     backgroundColor: '#50C2C9',
     justifyContent: 'center',
+    alignSelf: 'center',
     width: 306,
     height: 83,
     marginTop: hp('1%'),
     borderRadius: 10,
   },
-  buttonText: {
-    fontSize: 20,
+  loginText: {
+    fontSize: 25,
     color: '#ffffff',
     fontWeight: '700',
     textAlign: 'center',
   },
-  alreadyAccountWrapping: {
+  dontHaveAccountWrapping: {
     flexDirection: 'row',
-    marginTop: hp('0.8%'),
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: hp('1%'),
   },
-  alreadyAccountText: {
+  dontHaveAccountText: {
     fontSize: 14,
     fontWeight: '400',
     color: 'rgba(0, 0, 0, 0.75)',
+    textAlign: 'center',
   },
-  signInText: {
+  signUpText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: 'rgba(0, 112, 112, 0.75)',
+    textAlign: 'center',
   },
 });
 
-export default RegisterPage;
+export default SignInPage;

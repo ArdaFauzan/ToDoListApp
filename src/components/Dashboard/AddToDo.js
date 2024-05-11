@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import {View, TouchableOpacity, TextInput, StyleSheet} from 'react-native';
 import Axios from 'axios';
-import Check from '../assets/check.svg';
-import Close from '../assets/close.svg';
-import {BASE_API} from './API';
+import Check from '../../assets/check.svg';
+import Close from '../../assets/close.svg';
+import {BASE_API} from '../Utils/API';
 
 const AddToDo = ({onGet, onClose, name}) => {
   const [newToDo, setNewToDo] = useState('');

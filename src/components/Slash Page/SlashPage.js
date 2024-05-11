@@ -11,8 +11,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {deviceHeight, deviceWidth} from './Dimension';
-import SlashImage from '../assets/slashimage.svg';
+import {deviceHeight, deviceWidth} from '../Utils/Dimension';
+import SlashImage from '../../assets/slashimage.svg';
 
 const SlashPage2 = ({navigation}) => {
   return (
@@ -24,7 +24,7 @@ const SlashPage2 = ({navigation}) => {
       />
 
       <ImageBackground
-        source={require('../assets/Elipse.png')}
+        source={require('../../assets/Elipse.png')}
         style={styles.background}
       />
 

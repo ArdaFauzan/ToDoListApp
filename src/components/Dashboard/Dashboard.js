@@ -18,24 +18,34 @@ import {
 } from 'react-native-responsive-screen';
 import Clock from './Clock';
 import Axios from 'axios';
-import Plus from '../assets/plus.svg';
-import Trash from '../assets/trash.svg';
-import Camera from '../assets/camerauser.svg';
+import Plus from '../../assets/plus.svg';
+import Trash from '../../assets/trash.svg';
+import Camera from '../../assets/camerauser.svg';
 import ToDo from './ToDo';
 import AddToDo from './AddToDo';
 import * as Progress from 'react-native-progress';
 import AddPhoto from './AddPhoto';
-import {BASE_API} from './API';
+import {BASE_API} from '../Utils/API';
 
 const Dashboard = ({route}) => {
-  const [todos, setTodos] = useState([]);
-  const [showAddToDo, setShowAddToDo] = useState(false);
+  const [state, setState] = useState({
+    todos: [],
+    loading: true,
+    name: '',
+    showAddToDo: false,
+    showModal: false,
+  });
+
+  const updateState = (key, value) => {
+    setState(prevState => ({
+      ...prevState,
+      [key]: value,
+    }));
+  };
+
   const [editingId, setEditingId] = useState(null);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [checkedIds, setCheckedIds] = useState([]);
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
   const [userImageUri, setUserImageUri] = useState('');
 
   const {email} = route.params;
@@ -51,7 +61,7 @@ const Dashboard = ({route}) => {
 
   useEffect(() => {
     getNameHandler();
-    if (name) {
+    if (state.name) {
       getData();
     }
 
@@ -60,27 +70,28 @@ const Dashboard = ({route}) => {
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     };
-  }, [onBackPress, name]);
+  }, [onBackPress, state.name]);
 
   const getData = async () => {
     try {
-      await Axios.get(`${BASE_API}/gettodo/${name}`).then(res => {
-        setTodos(res.data.data);
-        setLoading(false);
+      await Axios.get(`${BASE_API}/gettodo/${state.name}`).then(res => {
+        updateState('todos', res.data.data);
+        updateState('loading', false);
       });
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
   };
 
-  const toggleShowAddToDo = () => setShowAddToDo(prev => !prev);
+  const toggleShowAddToDo = () =>
+    updateState('showAddToDo', !state.showAddToDo);
 
   const handleEdit = id => setEditingId(id);
 
   const handleSave = async (id, updatedText) => {
     const data = {
       todo: updatedText,
-      completed: todos.find(todo => todo.id === id)?.completed || false,
+      completed: state.todos.find(todo => todo.id === id)?.completed || false,
     };
 
     try {
@@ -109,14 +120,14 @@ const Dashboard = ({route}) => {
 
   const renderItem = ({item}) => (
     <ToDo
-      list={item} //v
-      onGet={getData} //v
+      list={item}
+      onGet={getData}
       onEdit={handleEdit}
       onSave={handleSave}
       isEditing={editingId === item.id}
       isDeleteMode={isDeleteMode}
       onActivateDeleteMode={() => setIsDeleteMode(true)}
-      checkedIds={checkedIds} //v
+      checkedIds={checkedIds}
       setCheckedIds={setCheckedIds}
     />
   );
@@ -125,14 +136,14 @@ const Dashboard = ({route}) => {
     try {
       const res = await Axios.get(`${BASE_API}/getusername/${email}`);
       const [user] = res.data.data;
-      setName(user.name);
+      updateState('name', user.name);
     } catch (err) {
       console.error('Error fetching name:', err);
     }
   };
 
   const handleCameraClick = () => {
-    setModalVisible(true);
+    updateState('showModal', true);
   };
 
   // const getPhotoUser = () => {
@@ -149,11 +160,11 @@ const Dashboard = ({route}) => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
+        visible={state.showModal}
+        onRequestClose={() => updateState('showModal', false)}>
         <AddPhoto
-          isVisible={modalVisible}
-          onClose={() => setModalVisible(false)}
+          isVisible={state.showModal}
+          onClose={() => updateState('showModal', false)}
           setUserImageUri={setUserImageUri}
         />
       </Modal>
@@ -161,17 +172,17 @@ const Dashboard = ({route}) => {
       <StatusBar
         translucent
         barStyle={'dark-content'}
-        backgroundColor={modalVisible ? 'rgba(0, 0, 0, 0.5)' : 'transparent'}
+        backgroundColor={state.showModal ? 'rgba(0, 0, 0, 0.5)' : 'transparent'}
       />
 
-      {loading ? (
+      {state.loading ? (
         <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
           <Progress.CircleSnail thickness={8} size={100} color={'#50C2C9'} />
         </View>
       ) : (
         <KeyboardAvoidingView behavior="position">
           <ImageBackground
-            source={require('../assets/bgdashboard.png')}
+            source={require('../../assets/bgdashboard.png')}
             style={styles.background}>
             <View style={styles.welcomeWrapping}>
               <View>
@@ -179,7 +190,7 @@ const Dashboard = ({route}) => {
                   source={
                     userImageUri
                       ? {uri: userImageUri}
-                      : require('../assets/user.png')
+                      : require('../../assets/user.png')
                   }
                   style={styles.userImage}
                 />
@@ -190,7 +201,7 @@ const Dashboard = ({route}) => {
                   <Camera height={35} width={35} />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.welcomeText}>Welcome {name}!</Text>
+              <Text style={styles.welcomeText}>Welcome {state.name}!</Text>
             </View>
           </ImageBackground>
 
@@ -219,16 +230,16 @@ const Dashboard = ({route}) => {
               </View>
 
               <FlatList
-                data={todos}
+                data={state.todos}
                 renderItem={renderItem}
                 keyExtractor={item => item.id.toString()}
                 style={styles.toDo}
                 ListHeaderComponent={
-                  showAddToDo ? (
+                  state.showAddToDo ? (
                     <AddToDo
                       onGet={getData}
                       onClose={toggleShowAddToDo}
-                      name={name}
+                      name={state.name}
                     />
                   ) : null
                 }

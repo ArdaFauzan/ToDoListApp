@@ -8,9 +8,9 @@ import {
 import {launchImageLibrary} from 'react-native-image-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import Camera from '../assets/camera.svg';
-import Gallery from '../assets/gallery.svg';
-import Trash from '../assets/trashPhoto.svg';
+import Camera from '../../assets/camera.svg';
+import Gallery from '../../assets/gallery.svg';
+import Trash from '../../assets/trashPhoto.svg';
 import Axios from 'axios';
 
 const AddPhoto = ({onClose, setUserImageUri}) => {

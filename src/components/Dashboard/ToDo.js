@@ -8,13 +8,13 @@ import {
   StyleSheet,
   Vibration,
 } from 'react-native';
-import BoxFull from '../assets/box_full.png';
-import Box from '../assets/box.png';
+import BoxFull from '../../assets/box_full.png';
+import Box from '../../assets/box.png';
 import Axios from 'axios';
-import Check from '../assets/check.svg';
-import Close from '../assets/close.svg';
+import Check from '../../assets/check.svg';
+import Close from '../../assets/close.svg';
 import CheckBox from '@react-native-community/checkbox';
-import {BASE_API} from './API';
+import {BASE_API} from '../Utils/API';
 
 const ToDo = ({
   list,
