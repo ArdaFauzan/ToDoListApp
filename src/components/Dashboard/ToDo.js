@@ -15,9 +15,9 @@ import Check from '../../assets/check.svg';
 import Close from '../../assets/close.svg';
 import CheckBox from '@react-native-community/checkbox';
 import {BASE_API} from '../Utils/API';
+import {useDispatch, useSelector} from 'react-redux';
 
 const ToDo = ({
-  list,
   onGet,
   onEdit,
   onSave,
@@ -27,12 +27,28 @@ const ToDo = ({
   checkedIds,
   setCheckedIds,
 }) => {
-  const [completed, setCompleted] = useState(list.completed);
-  const [editText, setEditText] = useState(list.todo);
+  const globalState = useSelector(state => state.DashboardReducer);
+  const dispatch = useDispatch();
+  const list = globalState.todos;
+  const [state, setState] = useState({
+    completed: list.completed,
+    editText: list.todo,
+  });
+
+  const updateState = (key, value, isGlobal = false) => {
+    if (isGlobal) {
+      dispatch({type: key, inputValue: value});
+    } else {
+      setState(prevState => ({
+        ...prevState,
+        [key]: value,
+      }));
+    }
+  };
 
   const completedHandler = () => {
-    const newCompleted = !completed;
-    setCompleted(newCompleted);
+    const newCompleted = !state.completed;
+    updateState('completed', newCompleted);
 
     updateCompleted(list.id);
   };
@@ -40,7 +56,7 @@ const ToDo = ({
   const updateCompleted = async id => {
     const data = {
       todo: list.todo,
-      completed: completed,
+      completed: state.completed,
     };
     try {
       await Axios.put(`${BASE_API}/updatetodo/${id}`, data);
@@ -67,7 +83,7 @@ const ToDo = ({
     <View style={styles.container}>
       <TouchableOpacity onPress={completedHandler}>
         <Image
-          source={completed ? BoxFull : Box}
+          source={state.completed ? BoxFull : Box}
           style={styles.completedImage}
         />
       </TouchableOpacity>
@@ -76,13 +92,13 @@ const ToDo = ({
         <>
           <View style={styles.containerIsEditing}>
             <TextInput
-              value={editText}
-              onChangeText={setEditText}
+              value={state.editText}
+              onChangeText={value => updateState('setEditText', value)}
               style={styles.toDoTextInput}
             />
 
             <View style={styles.wrappingHandlerEdit}>
-              <TouchableOpacity onPress={() => onSave(list.id, editText)}>
+              <TouchableOpacity onPress={() => onSave(list.id, state.editText)}>
                 <Check height={20} width={20} />
               </TouchableOpacity>
 
@@ -103,8 +119,8 @@ const ToDo = ({
               style={[
                 styles.toDoList,
                 {
-                  color: completed ? 'gray' : '#000000',
-                  textDecorationLine: completed ? 'line-through' : 'none',
+                  color: state.completed ? 'gray' : '#000000',
+                  textDecorationLine: state.completed ? 'line-through' : 'none',
                 },
               ]}>
               {list.todo}

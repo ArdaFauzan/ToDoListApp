@@ -26,42 +26,47 @@ import AddToDo from './AddToDo';
 import * as Progress from 'react-native-progress';
 import AddPhoto from './AddPhoto';
 import {BASE_API} from '../Utils/API';
+import {useSelector, useDispatch} from 'react-redux';
 
 const Dashboard = ({route}) => {
+  const globalState = useSelector(state => state.DashboardReducer);
+  const dispatch = useDispatch();
+
+  const {email} = route.params;
   const [state, setState] = useState({
-    todos: [],
+    // todos: [],
     loading: true,
-    name: '',
     showAddToDo: false,
     showModal: false,
   });
 
-  const updateState = (key, value) => {
-    setState(prevState => ({
-      ...prevState,
-      [key]: value,
-    }));
+  const updateState = (key, value, isGlobal = false) => {
+    if (isGlobal) {
+      dispatch({type: key, inputValue: value});
+    } else {
+      setState(prevState => ({
+        ...prevState,
+        [key]: value,
+      }));
+    }
   };
 
   const [editingId, setEditingId] = useState(null);
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [checkedIds, setCheckedIds] = useState([]);
   const [userImageUri, setUserImageUri] = useState('');
 
-  const {email} = route.params;
-
   const onBackPress = useCallback(() => {
-    if (isDeleteMode) {
-      setIsDeleteMode(false);
+    if (globalState.isDeleteMode) {
+      updateState('SET_DELETEMODE', false, true);
       return true;
     }
 
     return false;
-  }, [isDeleteMode]);
+  }, [globalState.isDeleteMode]);
 
   useEffect(() => {
     getNameHandler();
-    if (state.name) {
+    if (globalState.name) {
       getData();
     }
 
@@ -70,12 +75,12 @@ const Dashboard = ({route}) => {
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     };
-  }, [onBackPress, state.name]);
+  }, [onBackPress, globalState.name]);
 
   const getData = async () => {
     try {
-      await Axios.get(`${BASE_API}/gettodo/${state.name}`).then(res => {
-        updateState('todos', res.data.data);
+      await Axios.get(`${BASE_API}/gettodo/${globalState.name}`).then(res => {
+        updateState('SET_TODOS', res.data.data, true);
         updateState('loading', false);
       });
     } catch (error) {
@@ -91,7 +96,8 @@ const Dashboard = ({route}) => {
   const handleSave = async (id, updatedText) => {
     const data = {
       todo: updatedText,
-      completed: state.todos.find(todo => todo.id === id)?.completed || false,
+      completed:
+        globalState.todos.find(todo => todo.id === id)?.completed || false,
     };
 
     try {
@@ -110,7 +116,7 @@ const Dashboard = ({route}) => {
           checkedIds.map(id => Axios.delete(`${BASE_API}/deletetodo/${id}`)),
         );
         getData();
-        setIsDeleteMode(false);
+        updateState('SET_DELETEMODE', false, true);
         setCheckedIds([]);
       } catch (error) {
         console.error('Error deleting todos: ', error);
@@ -120,13 +126,12 @@ const Dashboard = ({route}) => {
 
   const renderItem = ({item}) => (
     <ToDo
-      list={item}
       onGet={getData}
       onEdit={handleEdit}
       onSave={handleSave}
       isEditing={editingId === item.id}
-      isDeleteMode={isDeleteMode}
-      onActivateDeleteMode={() => setIsDeleteMode(true)}
+      // isDeleteMode={isDeleteMode}
+      // onActivateDeleteMode={() => setIsDeleteMode(true)}
       checkedIds={checkedIds}
       setCheckedIds={setCheckedIds}
     />
@@ -136,7 +141,7 @@ const Dashboard = ({route}) => {
     try {
       const res = await Axios.get(`${BASE_API}/getusername/${email}`);
       const [user] = res.data.data;
-      updateState('name', user.name);
+      updateState('SET_NAME', user.name, true);
     } catch (err) {
       console.error('Error fetching name:', err);
     }
@@ -201,7 +206,9 @@ const Dashboard = ({route}) => {
                   <Camera height={35} width={35} />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.welcomeText}>Welcome {state.name}!</Text>
+              <Text style={styles.welcomeText}>
+                Welcome {globalState.name}!
+              </Text>
             </View>
           </ImageBackground>
 
@@ -213,15 +220,17 @@ const Dashboard = ({route}) => {
             <View style={styles.toDoContainer}>
               <View style={styles.dailyTaskWrapping}>
                 <Text style={styles.dailyTaskText}>
-                  {isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
+                  {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
                 </Text>
 
                 <TouchableOpacity
                   style={styles.plusWrapping}
                   onPress={
-                    isDeleteMode ? deleteCheckedHandler : toggleShowAddToDo
+                    globalState.isDeleteMode
+                      ? deleteCheckedHandler
+                      : toggleShowAddToDo
                   }>
-                  {isDeleteMode ? (
+                  {globalState.isDeleteMode ? (
                     <Trash width={28} height={28} />
                   ) : (
                     <Plus width={29} height={28} />
@@ -230,17 +239,13 @@ const Dashboard = ({route}) => {
               </View>
 
               <FlatList
-                data={state.todos}
+                data={globalState.todos}
                 renderItem={renderItem}
                 keyExtractor={item => item.id.toString()}
                 style={styles.toDo}
                 ListHeaderComponent={
                   state.showAddToDo ? (
-                    <AddToDo
-                      onGet={getData}
-                      onClose={toggleShowAddToDo}
-                      name={state.name}
-                    />
+                    <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
                   ) : null
                 }
               />

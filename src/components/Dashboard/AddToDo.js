@@ -4,8 +4,10 @@ import Axios from 'axios';
 import Check from '../../assets/check.svg';
 import Close from '../../assets/close.svg';
 import {BASE_API} from '../Utils/API';
+import {useSelector} from 'react-redux';
 
-const AddToDo = ({onGet, onClose, name}) => {
+const AddToDo = ({onGet, onClose}) => {
+  const globalState = useSelector(state => state.DashboardReducer);
   const [newToDo, setNewToDo] = useState('');
 
   const postData = () => {
@@ -16,7 +18,7 @@ const AddToDo = ({onGet, onClose, name}) => {
     };
 
     if (newToDo) {
-      Axios.post(`${BASE_API}/createtodo/${name}`, data)
+      Axios.post(`${BASE_API}/createtodo/${globalState.name}`, data)
         .then(res => {
           setNewToDo('');
           onGet();
