@@ -34,7 +34,6 @@ const Dashboard = ({route}) => {
 
   const {email} = route.params;
   const [state, setState] = useState({
-    // todos: [],
     loading: true,
     showAddToDo: false,
     showModal: false,
@@ -51,8 +50,6 @@ const Dashboard = ({route}) => {
     }
   };
 
-  const [editingId, setEditingId] = useState(null);
-  const [checkedIds, setCheckedIds] = useState([]);
   const [userImageUri, setUserImageUri] = useState('');
 
   const onBackPress = useCallback(() => {
@@ -91,51 +88,24 @@ const Dashboard = ({route}) => {
   const toggleShowAddToDo = () =>
     updateState('showAddToDo', !state.showAddToDo);
 
-  const handleEdit = id => setEditingId(id);
-
-  const handleSave = async (id, updatedText) => {
-    const data = {
-      todo: updatedText,
-      completed:
-        globalState.todos.find(todo => todo.id === id)?.completed || false,
-    };
-
-    try {
-      await Axios.put(`${BASE_API}/updatetodo/${id}`, data);
-      getData();
-      setEditingId(null);
-    } catch (error) {
-      console.error('Error updating data: ', error);
-    }
-  };
-
   const deleteCheckedHandler = async () => {
-    if (checkedIds.length > 0) {
+    if (globalState.checkedIds.length > 0) {
       try {
         await Promise.all(
-          checkedIds.map(id => Axios.delete(`${BASE_API}/deletetodo/${id}`)),
+          globalState.checkedIds.map(id =>
+            Axios.delete(`${BASE_API}/deletetodo/${id}`),
+          ),
         );
-        getData();
-        updateState('SET_DELETEMODE', false, true);
-        setCheckedIds([]);
+        await getData();
+        // Menggunakan action 'CLEAR_CHECKED_IDS' untuk mengosongkan checkedIds
+        updateState('CLEAR_CHECKED_IDS', [], true);
       } catch (error) {
         console.error('Error deleting todos: ', error);
       }
     }
   };
 
-  const renderItem = ({item}) => (
-    <ToDo
-      onGet={getData}
-      onEdit={handleEdit}
-      onSave={handleSave}
-      isEditing={editingId === item.id}
-      // isDeleteMode={isDeleteMode}
-      // onActivateDeleteMode={() => setIsDeleteMode(true)}
-      checkedIds={checkedIds}
-      setCheckedIds={setCheckedIds}
-    />
-  );
+  const renderItem = ({item}) => <ToDo key={item.id} list={item} />;
 
   const getNameHandler = async () => {
     try {

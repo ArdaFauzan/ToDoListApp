@@ -17,22 +17,11 @@ import CheckBox from '@react-native-community/checkbox';
 import {BASE_API} from '../Utils/API';
 import {useDispatch, useSelector} from 'react-redux';
 
-const ToDo = ({
-  onGet,
-  onEdit,
-  onSave,
-  isEditing,
-  isDeleteMode,
-  onActivateDeleteMode,
-  checkedIds,
-  setCheckedIds,
-}) => {
-  const globalState = useSelector(state => state.DashboardReducer);
-  const dispatch = useDispatch();
-  const list = globalState.todos;
+const ToDo = ({list, onGet}) => {
   const [state, setState] = useState({
     completed: list.completed,
     editText: list.todo,
+    isEditing: false,
   });
 
   const updateState = (key, value, isGlobal = false) => {
@@ -49,36 +38,49 @@ const ToDo = ({
   const completedHandler = () => {
     const newCompleted = !state.completed;
     updateState('completed', newCompleted);
-
-    updateCompleted(list.id);
+    updateToDo(list.id, newCompleted);
   };
 
-  const updateCompleted = async id => {
+  const updateToDo = async (id, completed) => {
     const data = {
-      todo: list.todo,
-      completed: state.completed,
+      todo: state.editText,
+      completed: completed,
     };
     try {
       await Axios.put(`${BASE_API}/updatetodo/${id}`, data);
+      onGet();
     } catch (error) {
       console.error('Error updating data: ', error);
     }
   };
 
+  const handleEdit = () => {
+    updateState('isEditing', true);
+  };
+
+  const handleSave = async () => {
+    updateState('isEditing', false);
+    updateToDo(list.id, state.completed);
+  };
+
+  const globalState = useSelector(state => state.DashboardReducer);
+  const dispatch = useDispatch();
+
   const handleLongPress = () => {
     const DURATION = 100;
     Vibration.vibrate(DURATION);
-    onActivateDeleteMode();
+    updateState('SET_DELETEMODE', true, true);
   };
 
   const checkBoxHandler = (id, isChecked) => {
     if (isChecked) {
-      setCheckedIds(prevIds => [...prevIds, id]);
+      // Menambahkan ID ke checkedIds
+      updateState('ADD_CHECKED_ID', id, true);
     } else {
-      setCheckedIds(prevIds => prevIds.filter(checkedId => checkedId !== id));
+      // Menghapus ID dari checkedIds
+      updateState('REMOVE_CHECKED_ID', id, true);
     }
   };
-
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={completedHandler}>
@@ -88,22 +90,23 @@ const ToDo = ({
         />
       </TouchableOpacity>
 
-      {isEditing ? (
+      {state.isEditing ? (
         <>
           <View style={styles.containerIsEditing}>
             <TextInput
               value={state.editText}
-              onChangeText={value => updateState('setEditText', value)}
+              onChangeText={value => updateState('editText', value)}
               style={styles.toDoTextInput}
+              onSubmitEditing={handleSave}
             />
 
             <View style={styles.wrappingHandlerEdit}>
-              <TouchableOpacity onPress={() => onSave(list.id, state.editText)}>
+              <TouchableOpacity onPress={() => handleSave(list.id)}>
                 <Check height={20} width={20} />
               </TouchableOpacity>
 
               <TouchableOpacity
-                onPress={() => onEdit(null)}
+                onPress={() => updateState('isEditing', false)}
                 style={styles.close}>
                 <Close height={20} width={20} />
               </TouchableOpacity>
@@ -112,9 +115,7 @@ const ToDo = ({
         </>
       ) : (
         <View style={styles.toDoListWrapping}>
-          <TouchableOpacity
-            onPress={() => onEdit(list.id)}
-            onLongPress={handleLongPress}>
+          <TouchableOpacity onPress={handleEdit} onLongPress={handleLongPress}>
             <Text
               style={[
                 styles.toDoList,
@@ -127,10 +128,10 @@ const ToDo = ({
             </Text>
           </TouchableOpacity>
 
-          {isDeleteMode && (
+          {globalState.isDeleteMode && (
             <View style={styles.checkBoxWrapping}>
               <CheckBox
-                value={checkedIds.includes(list.id)}
+                value={globalState.checkedIds.includes(list.id)}
                 onValueChange={newValue => checkBoxHandler(list.id, newValue)}
                 tintColors={('#787878', '#494949')}
                 style={styles.checkBox}
