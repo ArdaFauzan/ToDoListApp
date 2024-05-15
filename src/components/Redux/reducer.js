@@ -5,6 +5,7 @@ const initialDashboardState = {
   name: '',
   todos: [],
   checkedIds: [],
+  imageUri: '',
 };
 
 const DashboardReducer = (state = initialDashboardState, action) => {
@@ -44,6 +45,11 @@ const DashboardReducer = (state = initialDashboardState, action) => {
       return {
         ...state,
         checkedIds: [],
+      };
+    case 'SET_IMAGE_URI':
+      return {
+        ...state,
+        imageUri: action.inputValue,
       };
     default:
       return state;
