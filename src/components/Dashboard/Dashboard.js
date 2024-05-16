@@ -65,6 +65,7 @@ const Dashboard = ({route}) => {
     getNameHandler();
     if (globalState.name) {
       getData();
+      getUserPhoto();
     }
 
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
@@ -97,7 +98,6 @@ const Dashboard = ({route}) => {
           ),
         );
         await getData();
-        // Menggunakan action 'CLEAR_CHECKED_IDS' untuk mengosongkan checkedIds
         updateState('CLEAR_CHECKED_IDS', [], true);
       } catch (error) {
         console.error('Error deleting todos: ', error);
@@ -121,14 +121,14 @@ const Dashboard = ({route}) => {
     updateState('showModal', true);
   };
 
-  // const getPhotoUser = () => {
-  //   Axios.get(
-  //     `https://to-do-list-app-back-end.vercel.app/todo/getphoto/${name}`,
-  //   ).then(res => {
-  //     console.log(res);
-  //     setUserImageUri(res.imageurl);
-  //   });
-  // };
+  const getUserPhoto = () => {
+    Axios.get(
+      `https://to-do-list-app-back-end.vercel.app/todo/getphoto/${globalState.name}`,
+    ).then(res => {
+      const user = res.data.url[0];
+      updateState('SET_IMAGE_URI', user.imageurl, true);
+    });
+  };
 
   return (
     <View style={styles.container}>
@@ -163,8 +163,8 @@ const Dashboard = ({route}) => {
               <View>
                 <Image
                   source={
-                    userImageUri
-                      ? {uri: userImageUri}
+                    globalState.imageUri
+                      ? {uri: globalState.imageUri}
                       : require('../../assets/user.png')
                   }
                   style={styles.userImage}

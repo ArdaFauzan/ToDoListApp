@@ -26,7 +26,6 @@ const DashboardReducer = (state = initialDashboardState, action) => {
         todos: action.inputValue,
       };
     case 'ADD_CHECKED_ID':
-      // Pastikan tidak menambahkan ID yang sudah ada
       if (!state.checkedIds.includes(action.inputValue)) {
         return {
           ...state,
@@ -35,13 +34,11 @@ const DashboardReducer = (state = initialDashboardState, action) => {
       }
       return state;
     case 'REMOVE_CHECKED_ID':
-      // Filter ID yang akan dihapus
       return {
         ...state,
         checkedIds: state.checkedIds.filter(id => id !== action.inputValue),
       };
     case 'CLEAR_CHECKED_IDS':
-      // Kosongkan array checkedIds
       return {
         ...state,
         checkedIds: [],

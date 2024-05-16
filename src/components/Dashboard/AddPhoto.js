@@ -4,8 +4,10 @@ import {
   View,
   TouchableOpacity,
   TouchableWithoutFeedback,
+  PermissionsAndroid,
+  Platform,
 } from 'react-native';
-import {launchImageLibrary} from 'react-native-image-picker';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Camera from '../../assets/camera.svg';
 import Gallery from '../../assets/gallery.svg';
@@ -14,7 +16,7 @@ import Axios from 'axios';
 import {useDispatch, useSelector} from 'react-redux';
 import {Image as ImageCompressor} from 'react-native-compressor';
 
-const AddPhoto = ({onClose, setUserImageUri}) => {
+const AddPhoto = ({onClose}) => {
   const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
 
@@ -24,34 +26,81 @@ const AddPhoto = ({onClose, setUserImageUri}) => {
     includeBase64: false,
   };
 
-  const getImageLibrary = () => {
-    launchImageLibrary(options, res => {
-      if (res.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (res.error) {
-        console.log('Image picker error: ', res.error);
-      } else {
-        const source = res.assets[0].uri;
-        dispatch({type: 'SET_IMAGE_URI', inputValue: source.uri});
-        postPhotoUser(source);
-        console.log(source);
-      }
-    });
+  const getImage = async camera => {
+    // Fungsi untuk meminta izin kamera
+    const requestCameraPermission = async () => {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: 'App Camera Permission',
+          message: 'App needs access to your camera',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    };
+
+    // Fungsi untuk meminta izin galeri
+    const requestGalleryPermission = async () => {
+      const granted = await PermissionsAndroid.request(
+        Platform.Version < 33
+          ? PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+          : PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
+        {
+          title: 'App Gallery Permission',
+          message: 'App needs access to your photos',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    };
+
+    // Meminta izin berdasarkan pilihan pengguna
+    if (camera && (await requestCameraPermission())) {
+      launchCamera(options, handleImageResponse);
+    } else if (!camera && (await requestGalleryPermission())) {
+      launchImageLibrary(options, handleImageResponse);
+    }
+  };
+
+  // Fungsi untuk menangani respons dari kamera atau galeri
+  const handleImageResponse = res => {
+    if (res.didCancel) {
+      console.log('User cancelled image operation');
+    } else if (res.error) {
+      console.log('Image operation error: ', res.error);
+    } else if (res.assets && res.assets.length > 0) {
+      const source = {uri: res.assets[0].uri};
+      dispatch({type: 'SET_IMAGE_URI', inputValue: source.uri});
+      postPhotoUser(source.uri);
+    } else {
+      console.log('No image assets found');
+    }
   };
 
   const postPhotoUser = async uri => {
     const formData = new FormData();
     const name = globalState.name;
-
-    let fileExtension = uri.split('.').pop();
-
+    const fileExtension = uri.split('.').pop();
     let mimeType = 'image/jpeg';
-    if (fileExtension === 'png') {
-      mimeType = 'image/png';
-    } else if (fileExtension === 'jpg' || fileExtension === 'jpeg') {
-      mimeType = 'image/jpeg';
-    } else if (fileExtension === 'gif') {
-      mimeType = 'image/gif';
+
+    switch (fileExtension) {
+      case 'png':
+        mimeType = 'image/png';
+        break;
+      case 'jpg':
+      case 'jpeg':
+        mimeType = 'image/jpeg';
+        break;
+      case 'gif':
+        mimeType = 'image/gif';
+        break;
+      default:
+        mimeType = 'image/jpeg';
     }
 
     const compressedImage = await ImageCompressor.compress(uri, {
@@ -78,6 +127,18 @@ const AddPhoto = ({onClose, setUserImageUri}) => {
       console.log('Upload success:', response.data);
     } catch (error) {
       console.error('Error uploading photo:', error.message);
+    }
+  };
+
+  const deletePhotoUser = () => {
+    try {
+      Axios.delete(
+        `https://to-do-list-app-back-end.vercel.app/todo/deletephoto/${globalState.name}`,
+      ).then(res => {
+        dispatch({type: 'SET_IMAGE_URI', inputValue: ''});
+      });
+    } catch (error) {
+      console.error('Error fetching image: ', error);
     }
   };
 
@@ -123,15 +184,15 @@ const AddPhoto = ({onClose, setUserImageUri}) => {
               justifyContent: 'space-around',
               marginTop: 5,
             }}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => getImage(true)}>
               <Camera width={60} height={60} />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={getImageLibrary}>
+            <TouchableOpacity onPress={() => getImage(false)}>
               <Gallery width={60} height={60} />
             </TouchableOpacity>
 
-            <TouchableOpacity>
+            <TouchableOpacity onPress={deletePhotoUser}>
               <Trash width={60} height={60} />
             </TouchableOpacity>
           </View>

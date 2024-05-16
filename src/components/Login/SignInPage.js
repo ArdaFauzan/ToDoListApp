@@ -22,9 +22,6 @@ const SignInPage = ({navigation}) => {
     password: '',
     showPassword: false,
   });
-  // const [signIn, setSignIn] = useState('');
-  // const [password, setPassword] = useState('');
-  // const [showPassword, setShowPassword] = useState(false);
 
   const updateState = (key, value) => {
     setState(prevState => ({
