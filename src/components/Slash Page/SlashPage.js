@@ -13,11 +13,8 @@ import {
 } from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import SlashImage from '../../assets/slashimage.svg';
-import {useSelector} from 'react-redux';
 
 const SlashPage2 = ({navigation}) => {
-  // const globalState = useSelector(state => state.DashboardReducer);
-  // console.log(globalState);
   return (
     <View style={styles.container}>
       <StatusBar
@@ -39,10 +36,10 @@ const SlashPage2 = ({navigation}) => {
           sapien venenatis.
         </Text>
 
-        <TouchableOpacity onPress={() => navigation.navigate('SignInPage')}>
-          <View style={styles.buttonWrapping}>
-            <Text style={styles.buttonText}>Get Started</Text>
-          </View>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('SignInPage')}
+          style={styles.buttonWrapping}>
+          <Text style={styles.buttonText}>Get Started</Text>
         </TouchableOpacity>
       </View>
     </View>

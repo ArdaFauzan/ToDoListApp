@@ -6,6 +6,7 @@ import {
   TouchableWithoutFeedback,
   PermissionsAndroid,
   Platform,
+  StyleSheet,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -27,7 +28,6 @@ const AddPhoto = ({onClose}) => {
   };
 
   const getImage = async camera => {
-    // Fungsi untuk meminta izin kamera
     const requestCameraPermission = async () => {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
@@ -42,7 +42,6 @@ const AddPhoto = ({onClose}) => {
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     };
 
-    // Fungsi untuk meminta izin galeri
     const requestGalleryPermission = async () => {
       const granted = await PermissionsAndroid.request(
         Platform.Version < 33
@@ -59,7 +58,6 @@ const AddPhoto = ({onClose}) => {
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     };
 
-    // Meminta izin berdasarkan pilihan pengguna
     if (camera && (await requestCameraPermission())) {
       launchCamera(options, handleImageResponse);
     } else if (!camera && (await requestGalleryPermission())) {
@@ -67,7 +65,6 @@ const AddPhoto = ({onClose}) => {
     }
   };
 
-  // Fungsi untuk menangani respons dari kamera atau galeri
   const handleImageResponse = res => {
     if (res.didCancel) {
       console.log('User cancelled image operation');
@@ -144,46 +141,11 @@ const AddPhoto = ({onClose}) => {
 
   return (
     <TouchableWithoutFeedback onPress={onClose}>
-      <View
-        style={{
-          flex: 1,
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        }}>
-        <View
-          style={{
-            backgroundColor: '#FFFFFF',
-            width: 271,
-            height: 130,
-            borderRadius: 20,
-            shadowColor: '#000',
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.25,
-            shadowRadius: 3.84,
-            elevation: 5,
-            paddingTop: 10,
-            marginBottom: hp('40%'),
-          }}>
-          <Text
-            style={{
-              fontSize: 20,
-              fontWeight: 'bold',
-              color: '#000000',
-              textAlign: 'center',
-            }}>
-            Profile Photo
-          </Text>
+      <View style={styles.container}>
+        <View style={styles.contentWrapping}>
+          <Text style={styles.profilePhotoText}>Profile Photo</Text>
 
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              marginTop: 5,
-            }}>
+          <View style={styles.imageWrapping}>
             <TouchableOpacity onPress={() => getImage(true)}>
               <Camera width={60} height={60} />
             </TouchableOpacity>
@@ -201,5 +163,41 @@ const AddPhoto = ({onClose}) => {
     </TouchableWithoutFeedback>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  contentWrapping: {
+    backgroundColor: '#FFFFFF',
+    width: 271,
+    height: 130,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    paddingTop: 10,
+    marginBottom: hp('40%'),
+  },
+  profilePhotoText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+    textAlign: 'center',
+  },
+  imageWrapping: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 5,
+  },
+});
 
 export default AddPhoto;
