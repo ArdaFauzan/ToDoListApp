@@ -16,8 +16,12 @@ import Close from '../../assets/close.svg';
 import CheckBox from '@react-native-community/checkbox';
 import {BASE_API} from '../Utils/API';
 import {useDispatch, useSelector} from 'react-redux';
+import {getDataAsync} from '../Utils/AsyncStorage';
 
 const ToDo = ({list, onGet}) => {
+  const globalState = useSelector(state => state.DashboardReducer);
+  const dispatch = useDispatch();
+
   const [state, setState] = useState({
     completed: list.completed,
     editText: list.todo,
@@ -41,13 +45,19 @@ const ToDo = ({list, onGet}) => {
     updateToDo(list.id, newCompleted);
   };
 
-  const updateToDo = async (id, completed) => {
+  const updateToDo = async (todo_id, completed) => {
+    const token = await getDataAsync('token');
+
     const data = {
       todo: state.editText,
       completed: completed,
     };
     try {
-      await Axios.put(`${BASE_API}/updatetodo/${id}`, data);
+      await Axios.put(`${BASE_API}/updatetodo/${todo_id}`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       onGet();
     } catch (error) {
       console.error('Error updating data: ', error);
@@ -62,9 +72,6 @@ const ToDo = ({list, onGet}) => {
     updateState('isEditing', false);
     updateToDo(list.id, state.completed);
   };
-
-  const globalState = useSelector(state => state.DashboardReducer);
-  const dispatch = useDispatch();
 
   const handleLongPress = () => {
     const DURATION = 100;

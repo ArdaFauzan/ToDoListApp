@@ -15,19 +15,27 @@ import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import SignInImage from '../../assets/signinimage.svg';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
+import {storeData} from '../Utils/AsyncStorage';
+import {useDispatch} from 'react-redux';
 
 const SignInPage = ({navigation}) => {
+  const dispatch = useDispatch();
+
   const [state, setState] = useState({
     signIn: '',
     password: '',
     showPassword: false,
   });
 
-  const updateState = (key, value) => {
-    setState(prevState => ({
-      ...prevState,
-      [key]: value,
-    }));
+  const updateState = (key, value, isGlobal = false) => {
+    if (isGlobal) {
+      dispatch({type: key, inputValue: value});
+    } else {
+      setState(prevState => ({
+        ...prevState,
+        [key]: value,
+      }));
+    }
   };
 
   const showPasswordHandler = () => {
@@ -40,19 +48,19 @@ const SignInPage = ({navigation}) => {
       password: state.password,
     };
 
-    await Axios.post(`${BASE_API}/login`, data)
-      .then(res => {
-        Alert.alert('Warning!', 'Login success', [
-          {
-            text: 'OK',
-            onPress: () =>
-              navigation.navigate('Dashboard', {email: state.signIn}),
-          },
-        ]);
-      })
-      .catch(error => {
-        Alert.alert('Warning!', 'Email or Password is wrong!');
-      });
+    try {
+      const res = await Axios.post(`${BASE_API}/login`, data);
+      storeData('token', res.data.token);
+      storeData('user_id', res.data.user_id);
+      Alert.alert('Warning!', 'Login success', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('Dashboard'),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert('Warning!', 'Email or Password is wrong!');
+    }
   };
 
   return (

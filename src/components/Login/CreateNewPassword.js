@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import {
+  Alert,
+  Image,
   ImageBackground,
   StatusBar,
   StyleSheet,
@@ -13,18 +15,49 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import Axios from 'axios';
+import {BASE_API} from '../Utils/API';
 
-const CreateNewPassword = ({navigation}) => {
+const CreateNewPassword = ({navigation, route}) => {
   const [state, setState] = useState({
     password: '',
     confirmPassword: '',
+    showPassword: false,
   });
+
+  const {data} = route.params;
 
   const updateState = (key, value) => {
     setState(prevState => ({
       ...prevState,
       [key]: value,
     }));
+  };
+
+  const createNewPassword = async () => {
+    const newPassword = {
+      password: state.password,
+      passwordConfirm: state.confirmPassword,
+    };
+    await Axios.put(
+      `${BASE_API}/createnewpassword/${data.name}/${data.email}`,
+      newPassword,
+    )
+      .then(() => {
+        Alert.alert('Warning!', 'Password Changed, please Log In again', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('SignInPage'),
+          },
+        ]);
+      })
+      .catch(() => {
+        Alert.alert('Warning!', 'Name or Email is not registered!');
+      });
+  };
+
+  const showPasswordHandler = () => {
+    updateState('showPassword', !state.showPassword);
   };
 
   return (
@@ -51,12 +84,27 @@ const CreateNewPassword = ({navigation}) => {
 
         <Text style={styles.text}>Password*</Text>
 
-        <TextInput
-          value={state.password}
-          onChangeText={value => updateState('password', value)}
-          placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
-          style={styles.passwordTextInput}
-        />
+        <View style={styles.passwordTextInputWrapping}>
+          <TextInput
+            value={state.password}
+            onChangeText={value => updateState('password', value)}
+            placeholderTextColor="rgba(0, 0, 0, 0.75)"
+            secureTextEntry={!state.showPassword}
+            style={styles.passwordTextInput}
+          />
+          <TouchableOpacity
+            style={styles.showPasswordTouch}
+            onPress={showPasswordHandler}>
+            <Image
+              source={
+                state.showPassword
+                  ? require('../../assets/hide.png')
+                  : require('../../assets/view.png')
+              }
+              style={styles.eyeImage}
+            />
+          </TouchableOpacity>
+        </View>
         <Text style={styles.text}>Confirm Password*</Text>
 
         <TextInput
@@ -64,9 +112,12 @@ const CreateNewPassword = ({navigation}) => {
           onChangeText={value => updateState('confirmPassword', value)}
           placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
           style={styles.confirmPasswordTextInput}
+          secureTextEntry={true}
         />
 
-        <TouchableOpacity onPress={() => {}} style={styles.buttonWrapping}>
+        <TouchableOpacity
+          onPress={createNewPassword}
+          style={styles.buttonWrapping}>
           <Text style={styles.buttonText}>Create Password</Text>
         </TouchableOpacity>
       </View>
@@ -108,18 +159,29 @@ const styles = StyleSheet.create({
     marginLeft: wp('11%'),
     marginBottom: hp('1.5%'),
   },
+  passwordTextInputWrapping: {
+    marginBottom: hp('4%'),
+  },
   passwordTextInput: {
     width: 306,
     height: 54,
     backgroundColor: '#D8D8D8',
     color: 'black',
     fontSize: 14,
-    marginBottom: hp('4%'),
     borderRadius: 27,
     paddingLeft: 34,
     paddingRight: 20,
     fontWeight: '400',
     alignSelf: 'center',
+  },
+  showPasswordTouch: {
+    position: 'absolute',
+    right: 60,
+    top: 15,
+  },
+  eyeImage: {
+    height: 25,
+    width: 25,
   },
   confirmPasswordTextInput: {
     width: 306,

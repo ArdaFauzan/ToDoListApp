@@ -4,13 +4,15 @@ import Axios from 'axios';
 import Check from '../../assets/check.svg';
 import Close from '../../assets/close.svg';
 import {BASE_API} from '../Utils/API';
-import {useSelector} from 'react-redux';
+import {getDataAsync} from '../Utils/AsyncStorage';
 
 const AddToDo = ({onGet, onClose}) => {
-  const globalState = useSelector(state => state.DashboardReducer);
   const [newToDo, setNewToDo] = useState('');
 
-  const postData = () => {
+  const postData = async () => {
+    const user_id = await getDataAsync('user_id');
+    const token = await getDataAsync('token');
+
     const completed = 0;
     const data = {
       todo: newToDo,
@@ -18,12 +20,17 @@ const AddToDo = ({onGet, onClose}) => {
     };
 
     if (newToDo) {
-      Axios.post(`${BASE_API}/createtodo/${globalState.name}`, data)
-        .then(res => {
-          setNewToDo('');
-          onGet();
-        })
-        .catch(error => console.error('Error posting data: ', error));
+      try {
+        await Axios.post(`${BASE_API}/createtodo/${user_id}`, data, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setNewToDo('');
+        onGet();
+      } catch (error) {
+        console.error('Error posting data: ', error);
+      }
     } else {
       console.warn('Input your task!');
     }

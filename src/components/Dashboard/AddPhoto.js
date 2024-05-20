@@ -14,11 +14,12 @@ import Camera from '../../assets/camera.svg';
 import Gallery from '../../assets/gallery.svg';
 import Trash from '../../assets/trashPhoto.svg';
 import Axios from 'axios';
-import {useDispatch, useSelector} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import {Image as ImageCompressor} from 'react-native-compressor';
+import {BASE_API} from '../Utils/API';
+import {getDataAsync} from '../Utils/AsyncStorage';
 
 const AddPhoto = ({onClose}) => {
-  const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
 
   const options = {
@@ -81,7 +82,8 @@ const AddPhoto = ({onClose}) => {
 
   const postPhotoUser = async uri => {
     const formData = new FormData();
-    const name = globalState.name;
+    const user_id = await getDataAsync('user_id');
+    const token = await getDataAsync('token');
     const fileExtension = uri.split('.').pop();
     let mimeType = 'image/jpeg';
 
@@ -112,12 +114,13 @@ const AddPhoto = ({onClose}) => {
 
     try {
       const response = await Axios.post(
-        `https://to-do-list-app-back-end.vercel.app/todo/uploadphoto/${name}`,
+        `${BASE_API}/uploadphoto/${user_id}`,
         formData,
         {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
           },
         },
       );
@@ -127,15 +130,18 @@ const AddPhoto = ({onClose}) => {
     }
   };
 
-  const deletePhotoUser = () => {
+  const deletePhotoUser = async () => {
+    const user_id = await getDataAsync('user_id');
+    const token = await getDataAsync('token');
     try {
-      Axios.delete(
-        `https://to-do-list-app-back-end.vercel.app/todo/deletephoto/${globalState.name}`,
-      ).then(res => {
-        dispatch({type: 'SET_IMAGE_URI', inputValue: ''});
+      const res = await Axios.delete(`${BASE_API}/deletephoto/${user_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      dispatch({type: 'SET_IMAGE_URI', inputValue: ''});
     } catch (error) {
-      console.error('Error fetching image: ', error);
+      console.error('Error deleting image: ', error);
     }
   };
 

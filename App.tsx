@@ -1,6 +1,6 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import SlashPage from './src/components/Slash Page/SlashPage';
 import RegisterPage from './src/components/Register/RegisterPage';
 import SignInPage from './src/components/Login/SignInPage';
@@ -9,20 +9,43 @@ import ForgotPassword from './src/components/Login/ForgotPassword';
 import CreateNewPassword from './src/components/Login/CreateNewPassword';
 import {Provider} from 'react-redux';
 import store from './src/components/Redux/store';
+import {getDataAsync} from './src/components/Utils/AsyncStorage';
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+  const [token, setToken] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchToken = async () => {
+      const storedToken = await getDataAsync('token');
+      setToken(storedToken);
+      setIsLoading(false);
+    };
+
+    fetchToken();
+  }, []);
+
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <Provider store={store}>
       <NavigationContainer>
         <Stack.Navigator
-          initialRouteName="ForgotPassword"
+          initialRouteName="SlashPager"
           screenOptions={{headerShown: false}}>
-          <Stack.Screen name="SlashPage" component={SlashPage} />
-          <Stack.Screen name="SignInPage" component={SignInPage} />
-          <Stack.Screen name="RegisterPage" component={RegisterPage} />
-          <Stack.Screen name="Dashboard" component={Dashboard} />
+          {token == null ? (
+            <>
+              <Stack.Screen name="SlashPage" component={SlashPage} />
+              <Stack.Screen name="SignInPage" component={SignInPage} />
+              <Stack.Screen name="RegisterPage" component={RegisterPage} />
+            </>
+          ) : (
+            <Stack.Screen name="Dashboard" component={Dashboard} />
+          )}
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
           <Stack.Screen
             name="CreateNewPassword"

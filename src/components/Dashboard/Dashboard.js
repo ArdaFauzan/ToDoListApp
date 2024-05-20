@@ -11,6 +11,7 @@ import {
   StyleSheet,
   Modal,
   BackHandler,
+  Alert,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -27,16 +28,17 @@ import * as Progress from 'react-native-progress';
 import AddPhoto from './AddPhoto';
 import {BASE_API} from '../Utils/API';
 import {useSelector, useDispatch} from 'react-redux';
+import {getDataAsync} from '../Utils/AsyncStorage';
 
-const Dashboard = ({route}) => {
+const Dashboard = ({navigation}) => {
   const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
 
-  const {email} = route.params;
   const [state, setState] = useState({
     loading: true,
     showAddToDo: false,
     showModal: false,
+    name: '',
   });
 
   const updateState = (key, value, isGlobal = false) => {
@@ -50,8 +52,6 @@ const Dashboard = ({route}) => {
     }
   };
 
-  const [userImageUri, setUserImageUri] = useState('');
-
   const onBackPress = useCallback(() => {
     if (globalState.isDeleteMode) {
       updateState('SET_DELETEMODE', false, true);
@@ -62,25 +62,74 @@ const Dashboard = ({route}) => {
   }, [globalState.isDeleteMode]);
 
   useEffect(() => {
-    getNameHandler();
-    if (globalState.name) {
-      getData();
-      getUserPhoto();
-    }
+    const initializeDashboard = async () => {
+      try {
+        const user_id = await getDataAsync('user_id');
+        const token = await getDataAsync('token');
+        if (user_id && token) {
+          await Promise.all([
+            getData(user_id, token),
+            getNameHandler(user_id, token),
+            getUserPhoto(user_id, token),
+          ]);
+        } else {
+          Alert.alert('Warning!', 'You are logged out, please Log In again', [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('SignInPage'),
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error('Initialization error:', error);
+        Alert.alert(
+          'Error',
+          'An error occurred while initializing the dashboard. Please try again.',
+        );
+      }
+    };
 
+    initializeDashboard();
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     };
-  }, [onBackPress, globalState.name]);
+  }, [onBackPress]);
+
+  // const checkLoginStatus = async () => {
+  //   const user_id = await getDataAsync('user_id');
+  //   const token = await getDataAsync('token');
+  //   try {
+  //     if (user_id && token) {
+  //       getData();
+  //       getNameHandler(user_id, token);
+  //       getUserPhoto(user_id, token);
+  //     } else {
+  //       Alert.alert('Warning!', 'You are logged out, please Log In again', [
+  //         {
+  //           text: 'OK',
+  //           onPress: () => navigation.navigate('SignInPage'),
+  //         },
+  //       ]);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error checking login status:', error);
+  //   }
+  // };
 
   const getData = async () => {
+    const user_id = await getDataAsync('user_id');
+    const token = await getDataAsync('token');
+
     try {
-      await Axios.get(`${BASE_API}/gettodo/${globalState.name}`).then(res => {
-        updateState('SET_TODOS', res.data.data, true);
-        updateState('loading', false);
+      const res = await Axios.get(`${BASE_API}/gettodo/${user_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+      updateState('SET_TODOS', res.data.data, true);
+      updateState('loading', false);
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
@@ -90,11 +139,17 @@ const Dashboard = ({route}) => {
     updateState('showAddToDo', !state.showAddToDo);
 
   const deleteCheckedHandler = async () => {
+    const token = await getDataAsync('token');
+
     if (globalState.checkedIds.length > 0) {
       try {
         await Promise.all(
           globalState.checkedIds.map(id =>
-            Axios.delete(`${BASE_API}/deletetodo/${id}`),
+            Axios.delete(`${BASE_API}/deletetodo/${id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }),
           ),
         );
         await getData();
@@ -105,13 +160,19 @@ const Dashboard = ({route}) => {
     }
   };
 
-  const renderItem = ({item}) => <ToDo key={item.id} list={item} />;
+  const renderItem = ({item}) => (
+    <ToDo key={item.id} list={item} onGet={getData} />
+  );
 
-  const getNameHandler = async () => {
+  const getNameHandler = async (user_id, token) => {
     try {
-      const res = await Axios.get(`${BASE_API}/getusername/${email}`);
+      const res = await Axios.get(`${BASE_API}/getusername/${user_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const [user] = res.data.data;
-      updateState('SET_NAME', user.name, true);
+      updateState('name', user.name);
     } catch (err) {
       console.error('Error fetching name:', err);
     }
@@ -121,13 +182,19 @@ const Dashboard = ({route}) => {
     updateState('showModal', true);
   };
 
-  const getUserPhoto = () => {
-    Axios.get(
-      `https://to-do-list-app-back-end.vercel.app/todo/getphoto/${globalState.name}`,
-    ).then(res => {
+  const getUserPhoto = async (user_id, token) => {
+    try {
+      const res = await Axios.get(`${BASE_API}/getphoto/${user_id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       const user = res.data.url[0];
       updateState('SET_IMAGE_URI', user.imageurl, true);
-    });
+    } catch (error) {
+      console.error('Error fetching photo: ', error);
+    }
   };
 
   return (
@@ -140,7 +207,6 @@ const Dashboard = ({route}) => {
         <AddPhoto
           isVisible={state.showModal}
           onClose={() => updateState('showModal', false)}
-          setUserImageUri={setUserImageUri}
         />
       </Modal>
 
@@ -176,9 +242,7 @@ const Dashboard = ({route}) => {
                   <Camera height={35} width={35} />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.welcomeText}>
-                Welcome {globalState.name}!
-              </Text>
+              <Text style={styles.welcomeText}>Welcome {state.name}!</Text>
             </View>
           </ImageBackground>
 

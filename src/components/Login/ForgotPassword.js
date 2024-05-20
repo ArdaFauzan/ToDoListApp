@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Alert,
   ImageBackground,
   StatusBar,
   StyleSheet,
@@ -13,6 +14,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import Axios from 'axios';
+import {BASE_API} from '../Utils/API';
 
 const ForgotPassword = ({navigation}) => {
   const [state, setState] = useState({
@@ -25,6 +28,29 @@ const ForgotPassword = ({navigation}) => {
       ...prevState,
       [key]: value,
     }));
+  };
+
+  const checkUser = async () => {
+    const data = {
+      name: state.name,
+      email: state.email,
+    };
+
+    await Axios.post(`${BASE_API}/checknameandemail`, data)
+      .then(() => {
+        Alert.alert('Warning!', 'Account is registered', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('CreateNewPassword', {
+                data,
+              }),
+          },
+        ]);
+      })
+      .catch(() => {
+        Alert.alert('Warning!', 'Name or Email is not registered!');
+      });
   };
   return (
     <View style={styles.container}>
@@ -64,9 +90,7 @@ const ForgotPassword = ({navigation}) => {
           style={styles.emailTextInput}
         />
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('CreateNewPassword')}
-          style={styles.buttonWrapping}>
+        <TouchableOpacity onPress={checkUser} style={styles.buttonWrapping}>
           <Text style={styles.buttonText}>Confirm</Text>
         </TouchableOpacity>
       </View>

@@ -2,7 +2,6 @@ import {combineReducers} from '@reduxjs/toolkit';
 
 const initialDashboardState = {
   isDeleteMode: false,
-  name: '',
   todos: [],
   checkedIds: [],
   imageUri: '',
@@ -14,11 +13,6 @@ const DashboardReducer = (state = initialDashboardState, action) => {
       return {
         ...state,
         isDeleteMode: action.inputValue,
-      };
-    case 'SET_NAME':
-      return {
-        ...state,
-        name: action.inputValue,
       };
     case 'SET_TODOS':
       return {

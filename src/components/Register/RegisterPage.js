@@ -45,7 +45,7 @@ const RegisterPage = ({navigation}) => {
 
     try {
       await Axios.post(`${BASE_API}/register`, data).then(res => {
-        Alert.alert('Warning!', 'Sign up success, Please log in again');
+        Alert.alert('Warning!', 'Sign Up success, Please Log In again');
         navigation.navigate('SignInPage');
       });
     } catch (error) {
