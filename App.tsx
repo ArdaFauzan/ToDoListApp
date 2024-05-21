@@ -1,57 +1,37 @@
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React, {useEffect, useState} from 'react';
-import SlashPage from './src/components/Slash Page/SlashPage';
-import RegisterPage from './src/components/Register/RegisterPage';
-import SignInPage from './src/components/Login/SignInPage';
-import Dashboard from './src/components/Dashboard/Dashboard';
-import ForgotPassword from './src/components/Login/ForgotPassword';
-import CreateNewPassword from './src/components/Login/CreateNewPassword';
 import {Provider} from 'react-redux';
 import store from './src/components/Redux/store';
 import {getDataAsync} from './src/components/Utils/AsyncStorage';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import {AppStack} from './src/Navigation/AppStack';
+import {AuthStack} from './src/Navigation/AuthStack';
 
 const Stack = createNativeStackNavigator();
+const Drawer = createDrawerNavigator();
 
 const App = () => {
   const [token, setToken] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchToken = async () => {
-      const storedToken = await getDataAsync('token');
-      setToken(storedToken);
-      setIsLoading(false);
+    const isLogin = async () => {
+      let userToken;
+      try {
+        userToken = await getDataAsync('token');
+      } catch (e) {
+        console.log('Restoring token failed: ', e);
+      }
+      setToken(userToken);
     };
 
-    fetchToken();
+    isLogin();
   }, []);
-
-  if (isLoading) {
-    return null;
-  }
 
   return (
     <Provider store={store}>
       <NavigationContainer>
-        <Stack.Navigator
-          initialRouteName="SlashPager"
-          screenOptions={{headerShown: false}}>
-          {token == null ? (
-            <>
-              <Stack.Screen name="SlashPage" component={SlashPage} />
-              <Stack.Screen name="SignInPage" component={SignInPage} />
-              <Stack.Screen name="RegisterPage" component={RegisterPage} />
-            </>
-          ) : (
-            <Stack.Screen name="Dashboard" component={Dashboard} />
-          )}
-          <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
-          <Stack.Screen
-            name="CreateNewPassword"
-            component={CreateNewPassword}
-          />
-        </Stack.Navigator>
+        {token !== null ? <AppStack /> : <AuthStack />}
       </NavigationContainer>
     </Provider>
   );

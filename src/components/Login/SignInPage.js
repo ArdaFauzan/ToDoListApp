@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ImageBackground,
   View,
@@ -15,7 +15,7 @@ import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import SignInImage from '../../assets/signinimage.svg';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
-import {storeData} from '../Utils/AsyncStorage';
+import {getDataAsync, storeData} from '../Utils/AsyncStorage';
 import {useDispatch} from 'react-redux';
 
 const SignInPage = ({navigation}) => {
@@ -62,6 +62,14 @@ const SignInPage = ({navigation}) => {
       Alert.alert('Warning!', 'Email or Password is wrong!');
     }
   };
+
+  // const getToken = async () => {
+  //   await getDataAsync('token');
+  // };
+
+  // useEffect(() => {
+  //   getToken();
+  // }, []);
 
   return (
     <View style={styles.container}>
@@ -120,12 +128,14 @@ const SignInPage = ({navigation}) => {
           <Text style={styles.forgotPasswordText}>Forgot Password ?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={loginHandler} style={styles.loginButton}>
+        <TouchableOpacity
+          onPress={() => loginHandler()}
+          style={styles.loginButton}>
           <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
 
         <View style={styles.dontHaveAccountWrapping}>
-          <Text style={styles.dontHaveAccountText}>Don’t have a account ?</Text>
+          <Text style={styles.dontHaveAccountText}>Don’t have an account?</Text>
           <TouchableOpacity onPress={() => navigation.navigate('RegisterPage')}>
             <Text style={styles.signUpText}> Sign Up</Text>
           </TouchableOpacity>

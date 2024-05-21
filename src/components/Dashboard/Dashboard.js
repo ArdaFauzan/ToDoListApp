@@ -28,7 +28,7 @@ import * as Progress from 'react-native-progress';
 import AddPhoto from './AddPhoto';
 import {BASE_API} from '../Utils/API';
 import {useSelector, useDispatch} from 'react-redux';
-import {getDataAsync} from '../Utils/AsyncStorage';
+import {deleteData, getDataAsync} from '../Utils/AsyncStorage';
 
 const Dashboard = ({navigation}) => {
   const globalState = useSelector(state => state.DashboardReducer);
@@ -57,66 +57,36 @@ const Dashboard = ({navigation}) => {
       updateState('SET_DELETEMODE', false, true);
       return true;
     }
-
     return false;
   }, [globalState.isDeleteMode]);
 
   useEffect(() => {
-    const initializeDashboard = async () => {
-      try {
-        const user_id = await getDataAsync('user_id');
-        const token = await getDataAsync('token');
-        if (user_id && token) {
-          await Promise.all([
-            getData(user_id, token),
-            getNameHandler(user_id, token),
-            getUserPhoto(user_id, token),
-          ]);
-        } else {
-          Alert.alert('Warning!', 'You are logged out, please Log In again', [
-            {
-              text: 'OK',
-              onPress: () => navigation.navigate('SignInPage'),
-            },
-          ]);
-        }
-      } catch (error) {
-        console.error('Initialization error:', error);
-        Alert.alert(
-          'Error',
-          'An error occurred while initializing the dashboard. Please try again.',
-        );
-      }
-    };
-
     initializeDashboard();
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     };
-  }, [onBackPress]);
+  }, [initializeDashboard]);
 
-  // const checkLoginStatus = async () => {
-  //   const user_id = await getDataAsync('user_id');
-  //   const token = await getDataAsync('token');
-  //   try {
-  //     if (user_id && token) {
-  //       getData();
-  //       getNameHandler(user_id, token);
-  //       getUserPhoto(user_id, token);
-  //     } else {
-  //       Alert.alert('Warning!', 'You are logged out, please Log In again', [
-  //         {
-  //           text: 'OK',
-  //           onPress: () => navigation.navigate('SignInPage'),
-  //         },
-  //       ]);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error checking login status:', error);
-  //   }
-  // };
+  const initializeDashboard = async () => {
+    try {
+      const user_id = await getDataAsync('user_id');
+      const token = await getDataAsync('token');
+
+      await Promise.all([
+        getData(user_id, token),
+        getNameHandler(user_id, token),
+        getUserPhoto(user_id, token),
+      ]);
+    } catch (error) {
+      console.error('Initialization error:', error);
+      Alert.alert(
+        'Error',
+        'An error occurred while initializing the dashboard. Please try again.',
+      );
+    }
+  };
 
   const getData = async () => {
     const user_id = await getDataAsync('user_id');
@@ -197,6 +167,24 @@ const Dashboard = ({navigation}) => {
     }
   };
 
+  const deleteToken = async () => {
+    try {
+      await deleteData('token');
+      Alert.alert('Warning!', 'You are logged out, please Log In again', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('SlashPage'),
+        },
+      ]);
+    } catch (error) {
+      console.error('Error logging out: ', error);
+      Alert.alert(
+        'Error',
+        'An error occurred while logging out. Please try again.',
+      );
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Modal
@@ -250,6 +238,12 @@ const Dashboard = ({navigation}) => {
             <Text style={styles.greetingText}>Good Morning</Text>
             <Clock />
             <Text style={styles.taskListText}>Tasks List</Text>
+
+            <TouchableOpacity
+              style={{position: 'relative', left: 280, bottom: 20}}
+              onPress={() => deleteToken()}>
+              <Text style={{color: 'red', fontSize: 20}}>LOG OUT</Text>
+            </TouchableOpacity>
 
             <View style={styles.toDoContainer}>
               <View style={styles.dailyTaskWrapping}>
