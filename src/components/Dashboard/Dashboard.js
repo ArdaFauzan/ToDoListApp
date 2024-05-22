@@ -24,7 +24,6 @@ import Trash from '../../assets/trash.svg';
 import Camera from '../../assets/camerauser.svg';
 import ToDo from './ToDo';
 import AddToDo from './AddToDo';
-import * as Progress from 'react-native-progress';
 import AddPhoto from './AddPhoto';
 import {BASE_API} from '../Utils/API';
 import {useSelector, useDispatch} from 'react-redux';
@@ -35,7 +34,6 @@ const Dashboard = ({navigation}) => {
   const dispatch = useDispatch();
 
   const [state, setState] = useState({
-    loading: true,
     showAddToDo: false,
     showModal: false,
     name: '',
@@ -99,7 +97,6 @@ const Dashboard = ({navigation}) => {
         },
       });
       updateState('SET_TODOS', res.data.data, true);
-      updateState('loading', false);
     } catch (error) {
       console.error('Error fetching data: ', error);
     }
@@ -204,83 +201,77 @@ const Dashboard = ({navigation}) => {
         backgroundColor={state.showModal ? 'rgba(0, 0, 0, 0.5)' : 'transparent'}
       />
 
-      {state.loading ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <Progress.CircleSnail thickness={8} size={100} color={'#50C2C9'} />
-        </View>
-      ) : (
-        <KeyboardAvoidingView behavior="position">
-          <ImageBackground
-            source={require('../../assets/bgdashboard.png')}
-            style={styles.background}>
-            <View style={styles.welcomeWrapping}>
-              <View>
-                <Image
-                  source={
-                    globalState.imageUri
-                      ? {uri: globalState.imageUri}
-                      : require('../../assets/user.png')
-                  }
-                  style={styles.userImage}
-                />
-
-                <TouchableOpacity
-                  onPress={handleCameraClick}
-                  style={{position: 'absolute', right: 30, top: 70, left: 80}}>
-                  <Camera height={35} width={35} />
-                </TouchableOpacity>
-              </View>
-              <Text style={styles.welcomeText}>Welcome {state.name}!</Text>
-            </View>
-          </ImageBackground>
-
-          <View>
-            <Text style={styles.greetingText}>Good Morning</Text>
-            <Clock />
-            <Text style={styles.taskListText}>Tasks List</Text>
-
-            <TouchableOpacity
-              style={{position: 'relative', left: 280, bottom: 20}}
-              onPress={() => deleteToken()}>
-              <Text style={{color: 'red', fontSize: 20}}>LOG OUT</Text>
-            </TouchableOpacity>
-
-            <View style={styles.toDoContainer}>
-              <View style={styles.dailyTaskWrapping}>
-                <Text style={styles.dailyTaskText}>
-                  {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
-                </Text>
-
-                <TouchableOpacity
-                  style={styles.plusWrapping}
-                  onPress={
-                    globalState.isDeleteMode
-                      ? deleteCheckedHandler
-                      : toggleShowAddToDo
-                  }>
-                  {globalState.isDeleteMode ? (
-                    <Trash width={28} height={28} />
-                  ) : (
-                    <Plus width={29} height={28} />
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              <FlatList
-                data={globalState.todos}
-                renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
-                style={styles.toDo}
-                ListHeaderComponent={
-                  state.showAddToDo ? (
-                    <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
-                  ) : null
+      <KeyboardAvoidingView behavior="position">
+        <ImageBackground
+          source={require('../../assets/bgdashboard.png')}
+          style={styles.background}>
+          <View style={styles.welcomeWrapping}>
+            <View>
+              <Image
+                source={
+                  globalState.imageUri
+                    ? {uri: globalState.imageUri}
+                    : require('../../assets/user.png')
                 }
+                style={styles.userImage}
               />
+
+              <TouchableOpacity
+                onPress={handleCameraClick}
+                style={{position: 'absolute', right: 30, top: 70, left: 80}}>
+                <Camera height={35} width={35} />
+              </TouchableOpacity>
             </View>
+            <Text style={styles.welcomeText}>Welcome {state.name}!</Text>
           </View>
-        </KeyboardAvoidingView>
-      )}
+        </ImageBackground>
+
+        <View>
+          <Text style={styles.greetingText}>Good Morning</Text>
+          <Clock />
+          <Text style={styles.taskListText}>Tasks List</Text>
+
+          <TouchableOpacity
+            style={{position: 'relative', left: 280, bottom: 20}}
+            onPress={() => deleteToken()}>
+            <Text style={{color: 'red', fontSize: 20}}>LOG OUT</Text>
+          </TouchableOpacity>
+
+          <View style={styles.toDoContainer}>
+            <View style={styles.dailyTaskWrapping}>
+              <Text style={styles.dailyTaskText}>
+                {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
+              </Text>
+
+              <TouchableOpacity
+                style={styles.plusWrapping}
+                onPress={
+                  globalState.isDeleteMode
+                    ? deleteCheckedHandler
+                    : toggleShowAddToDo
+                }>
+                {globalState.isDeleteMode ? (
+                  <Trash width={28} height={28} />
+                ) : (
+                  <Plus width={29} height={28} />
+                )}
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={globalState.todos}
+              renderItem={renderItem}
+              keyExtractor={item => item.id.toString()}
+              style={styles.toDo}
+              ListHeaderComponent={
+                state.showAddToDo ? (
+                  <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
+                ) : null
+              }
+            />
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

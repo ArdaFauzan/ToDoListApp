@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   ImageBackground,
   View,
@@ -15,7 +15,7 @@ import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import SignInImage from '../../assets/signinimage.svg';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
-import {getDataAsync, storeData} from '../Utils/AsyncStorage';
+import {storeData} from '../Utils/AsyncStorage';
 import {useDispatch} from 'react-redux';
 
 const SignInPage = ({navigation}) => {
@@ -62,14 +62,6 @@ const SignInPage = ({navigation}) => {
       Alert.alert('Warning!', 'Email or Password is wrong!');
     }
   };
-
-  // const getToken = async () => {
-  //   await getDataAsync('token');
-  // };
-
-  // useEffect(() => {
-  //   getToken();
-  // }, []);
 
   return (
     <View style={styles.container}>

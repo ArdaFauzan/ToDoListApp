@@ -14,7 +14,7 @@ import {
 import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import SlashImage from '../../assets/slashimage.svg';
 
-const SlashPage2 = ({navigation}) => {
+const SlashPage = ({navigation}) => {
   return (
     <View style={styles.container}>
       <StatusBar
@@ -90,4 +90,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SlashPage2;
+export default SlashPage;
