@@ -50,6 +50,7 @@ const SignInPage = ({navigation}) => {
 
     try {
       const res = await Axios.post(`${BASE_API}/login`, data);
+      storeData('name', res.data.name);
       storeData('token', res.data.token);
       storeData('user_id', res.data.user_id);
       Alert.alert('Warning!', 'Login success', [

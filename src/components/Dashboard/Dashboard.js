@@ -36,7 +36,7 @@ const Dashboard = ({navigation}) => {
   const [state, setState] = useState({
     showAddToDo: false,
     showModal: false,
-    name: '',
+    userName: '',
   });
 
   const updateState = (key, value, isGlobal = false) => {
@@ -71,10 +71,11 @@ const Dashboard = ({navigation}) => {
     try {
       const user_id = await getDataAsync('user_id');
       const token = await getDataAsync('token');
+      const getName = await getDataAsync('name');
 
       await Promise.all([
+        updateState('userName', getName),
         getData(user_id, token),
-        getNameHandler(user_id, token),
         getUserPhoto(user_id, token),
       ]);
     } catch (error) {
@@ -130,20 +131,6 @@ const Dashboard = ({navigation}) => {
   const renderItem = ({item}) => (
     <ToDo key={item.id} list={item} onGet={getData} />
   );
-
-  const getNameHandler = async (user_id, token) => {
-    try {
-      const res = await Axios.get(`${BASE_API}/getusername/${user_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const [user] = res.data.data;
-      updateState('name', user.name);
-    } catch (err) {
-      console.error('Error fetching name:', err);
-    }
-  };
 
   const handleCameraClick = () => {
     updateState('showModal', true);
@@ -222,7 +209,7 @@ const Dashboard = ({navigation}) => {
                 <Camera height={35} width={35} />
               </TouchableOpacity>
             </View>
-            <Text style={styles.welcomeText}>Welcome {state.name}!</Text>
+            <Text style={styles.welcomeText}>Welcome {state.userName}!</Text>
           </View>
         </ImageBackground>
 
