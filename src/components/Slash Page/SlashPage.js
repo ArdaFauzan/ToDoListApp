@@ -31,10 +31,7 @@ const SlashPage = ({navigation}) => {
       <View style={styles.contentWrapping}>
         <SlashImage height={261} width={270} />
         <Text style={styles.tittleText}>Get Things Done With TODO</Text>
-        <Text style={styles.descText}>
-          Lorem ipsum dolor sit amet consectetur. Tellus consequat euismod cras
-          sapien venenatis.
-        </Text>
+        <Text style={styles.descText}>Let’s Start your day now</Text>
 
         <TouchableOpacity
           onPress={() => navigation.navigate('SignInPage')}
@@ -64,14 +61,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: hp('1.9%'),
+    marginBottom: hp('3%'),
   },
   descText: {
-    fontSize: 15,
+    fontSize: 16,
     color: 'black',
     fontWeight: '400',
     textAlign: 'center',
     marginTop: hp('1%'),
     marginHorizontal: wp('6%'),
+    marginBottom: hp('3%'),
   },
   buttonWrapping: {
     backgroundColor: '#50C2C9',

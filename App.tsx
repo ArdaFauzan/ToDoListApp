@@ -10,6 +10,7 @@ import SignInPage from './src/components/Login/SignInPage';
 import RegisterPage from './src/components/Register/RegisterPage';
 import SlashPage from './src/components/Slash Page/SlashPage';
 import Loading from './src/components/Dashboard/Loading';
+import ForgotPassword from './src/components/Login/ForgotPassword';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
@@ -24,6 +25,7 @@ const App = () => {
           <Stack.Screen name="SignInPage" component={SignInPage} />
           <Stack.Screen name="Dashboard" component={Dashboard} />
           <Stack.Screen name="RegisterPage" component={RegisterPage} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
           <Stack.Screen
             name="CreateNewPassword"
             component={CreateNewPassword}
