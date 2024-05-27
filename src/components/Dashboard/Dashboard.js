@@ -22,6 +22,7 @@ import Axios from 'axios';
 import Plus from '../../assets/plus.svg';
 import Trash from '../../assets/trash.svg';
 import Camera from '../../assets/camerauser.svg';
+import DrawerMenu from '../../assets/drawer.svg';
 import ToDo from './ToDo';
 import AddToDo from './AddToDo';
 import AddPhoto from './AddPhoto';
@@ -143,29 +144,10 @@ const Dashboard = ({navigation}) => {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      const user = res.data.url[0];
-      updateState('SET_IMAGE_URI', user.imageurl, true);
+      const user = res.data.url;
+      updateState('SET_IMAGE_URI', user, true);
     } catch (error) {
       console.error('Error fetching photo: ', error);
-    }
-  };
-
-  const deleteToken = async () => {
-    try {
-      await deleteData('token');
-      Alert.alert('Warning!', 'You are logged out, please Log In again', [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('SlashPage'),
-        },
-      ]);
-    } catch (error) {
-      console.error('Error logging out: ', error);
-      Alert.alert(
-        'Error',
-        'An error occurred while logging out. Please try again.',
-      );
     }
   };
 
@@ -192,6 +174,12 @@ const Dashboard = ({navigation}) => {
         <ImageBackground
           source={require('../../assets/bgdashboard.png')}
           style={styles.background}>
+          <TouchableOpacity
+            onPress={() => navigation.openDrawer()}
+            style={{marginTop: hp('5%'), marginLeft: wp('7%')}}>
+            <DrawerMenu height={43} width={39} />
+          </TouchableOpacity>
+
           <View style={styles.welcomeWrapping}>
             <View>
               <Image
@@ -217,12 +205,6 @@ const Dashboard = ({navigation}) => {
           <Text style={styles.greetingText}>Good Morning</Text>
           <Clock />
           <Text style={styles.taskListText}>Tasks List</Text>
-
-          <TouchableOpacity
-            style={{position: 'relative', left: 280, bottom: 20}}
-            onPress={() => deleteToken()}>
-            <Text style={{color: 'red', fontSize: 20}}>LOG OUT</Text>
-          </TouchableOpacity>
 
           <View style={styles.toDoContainer}>
             <View style={styles.dailyTaskWrapping}>
@@ -268,13 +250,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    width: 360,
+    width: '100%',
     height: 230,
   },
   welcomeWrapping: {
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: hp('9%'),
   },
   userImage: {
     height: 110,

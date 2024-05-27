@@ -11,9 +11,20 @@ import RegisterPage from './src/components/Register/RegisterPage';
 import SlashPage from './src/components/Slash Page/SlashPage';
 import Loading from './src/components/Dashboard/Loading';
 import ForgotPassword from './src/components/Login/ForgotPassword';
+import DashboardDrawer from './src/components/Drawer/DashboardDrawer';
 
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
+
+const DrawerNavigator = () => {
+  return (
+    <Drawer.Navigator
+      screenOptions={{headerShown: false}}
+      drawerContent={props => <DashboardDrawer {...props} />}>
+      <Drawer.Screen name="DashboardDrawer" component={Dashboard} />
+    </Drawer.Navigator>
+  );
+};
 
 const App = () => {
   return (
@@ -23,7 +34,7 @@ const App = () => {
           <Stack.Screen name="Loading" component={Loading} />
           <Stack.Screen name="SlashPage" component={SlashPage} />
           <Stack.Screen name="SignInPage" component={SignInPage} />
-          <Stack.Screen name="Dashboard" component={Dashboard} />
+          <Stack.Screen name="Dashboard" component={DrawerNavigator} />
           <Stack.Screen name="RegisterPage" component={RegisterPage} />
           <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
           <Stack.Screen
