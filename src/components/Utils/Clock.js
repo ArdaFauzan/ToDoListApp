@@ -1,12 +1,16 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import AnalogClock from 'react-native-clock-analog';
+import {colors} from '../config/theme';
 
 const Clock = () => {
+  const theme = {mode: 'light'};
+  let activeColors = colors[theme.mode];
+
   return (
     <View style={styles.container}>
       <AnalogClock
-        colorClock="#ECECEC"
+        colorClock={activeColors.secondary}
         colorNumber="#37A6AC"
         colorCenter="#C9C1C1"
         colorHour="#3DA8AE"

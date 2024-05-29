@@ -1,12 +1,16 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {View, TouchableOpacity, TextInput, StyleSheet} from 'react-native';
 import Axios from 'axios';
 import Check from '../../assets/check.svg';
 import Close from '../../assets/close.svg';
 import {BASE_API} from '../Utils/API';
 import {getDataAsync} from '../Utils/AsyncStorage';
+import {colors} from '../config/theme';
+import {ThemeContext} from '../Context/ThemeContext';
 
 const AddToDo = ({onGet, onClose}) => {
+  const {theme} = useContext(ThemeContext);
+  let activeColors = colors[theme.mode];
   const [newToDo, setNewToDo] = useState('');
 
   const postData = async () => {
@@ -39,9 +43,9 @@ const AddToDo = ({onGet, onClose}) => {
   return (
     <View style={styles.container}>
       <TextInput
-        style={styles.toDoTextInput}
+        style={[styles.toDoTextInput, {color: activeColors.text}]}
         placeholder="Add new todo"
-        placeholderTextColor="#000000"
+        placeholderTextColor={activeColors.text}
         onChangeText={text => setNewToDo(text)}
         value={newToDo}
       />
@@ -69,7 +73,6 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderBottomWidth: 1,
     paddingRight: 2,
-    color: '#000000',
     paddingLeft: 6,
     marginRight: 100,
     marginLeft: 35,

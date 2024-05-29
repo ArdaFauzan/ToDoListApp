@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   Image,
   Text,
@@ -17,8 +17,12 @@ import CheckBox from '@react-native-community/checkbox';
 import {BASE_API} from '../Utils/API';
 import {useDispatch, useSelector} from 'react-redux';
 import {getDataAsync} from '../Utils/AsyncStorage';
+import {colors} from '../config/theme';
+import {ThemeContext} from '../Context/ThemeContext';
 
 const ToDo = ({list, onGet}) => {
+  const {theme} = useContext(ThemeContext);
+  let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
 
@@ -127,7 +131,7 @@ const ToDo = ({list, onGet}) => {
               style={[
                 styles.toDoList,
                 {
-                  color: state.completed ? 'gray' : '#000000',
+                  color: state.completed ? 'gray' : activeColors.text,
                   textDecorationLine: state.completed ? 'line-through' : 'none',
                 },
               ]}>

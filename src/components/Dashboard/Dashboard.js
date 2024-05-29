@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useContext} from 'react';
 import {
   View,
   Text,
@@ -17,10 +17,11 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import Clock from './Clock';
+import Clock from '../Utils/Clock';
 import Axios from 'axios';
 import Plus from '../../assets/plus.svg';
 import Trash from '../../assets/trash.svg';
+import DarkTrash from '../../assets/trashdark.svg';
 import Camera from '../../assets/camerauser.svg';
 import DrawerMenu from '../../assets/drawer.svg';
 import ToDo from './ToDo';
@@ -28,9 +29,13 @@ import AddToDo from './AddToDo';
 import AddPhoto from './AddPhoto';
 import {BASE_API} from '../Utils/API';
 import {useSelector, useDispatch} from 'react-redux';
-import {deleteData, getDataAsync} from '../Utils/AsyncStorage';
+import {getDataAsync} from '../Utils/AsyncStorage';
+import {colors} from '../config/theme';
+import {ThemeContext} from '../Context/ThemeContext';
 
 const Dashboard = ({navigation}) => {
+  const {theme} = useContext(ThemeContext);
+  let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
 
@@ -66,7 +71,7 @@ const Dashboard = ({navigation}) => {
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     };
-  }, [initializeDashboard]);
+  }, [onBackPress]);
 
   const initializeDashboard = async () => {
     try {
@@ -152,7 +157,7 @@ const Dashboard = ({navigation}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {backgroundColor: activeColors.primary}]}>
       <Modal
         animationType="slide"
         transparent={true}
@@ -166,17 +171,21 @@ const Dashboard = ({navigation}) => {
 
       <StatusBar
         translucent
-        barStyle={'dark-content'}
-        backgroundColor={state.showModal ? 'rgba(0, 0, 0, 0.5)' : 'transparent'}
+        barStyle={theme.mode === 'light' ? 'dark-content' : activeColors.text}
+        backgroundColor={'transparent'}
       />
 
       <KeyboardAvoidingView behavior="position">
         <ImageBackground
-          source={require('../../assets/bgdashboard.png')}
+          source={
+            theme.mode === 'dark'
+              ? require('../../assets/bgdashboarddark.png')
+              : require('../../assets/bgdashboard.png')
+          }
           style={styles.background}>
           <TouchableOpacity
             onPress={() => navigation.openDrawer()}
-            style={{marginTop: hp('5%'), marginLeft: wp('7%')}}>
+            style={styles.drawer}>
             <DrawerMenu height={43} width={39} />
           </TouchableOpacity>
 
@@ -202,13 +211,21 @@ const Dashboard = ({navigation}) => {
         </ImageBackground>
 
         <View>
-          <Text style={styles.greetingText}>Good Morning</Text>
+          <Text style={[styles.greetingText, {color: activeColors.text}]}>
+            Good Morning
+          </Text>
           <Clock />
-          <Text style={styles.taskListText}>Tasks List</Text>
+          <Text style={[styles.taskListText, {color: activeColors.text}]}>
+            Tasks List
+          </Text>
 
-          <View style={styles.toDoContainer}>
+          <View
+            style={[
+              styles.toDoContainer,
+              {backgroundColor: activeColors.secondary},
+            ]}>
             <View style={styles.dailyTaskWrapping}>
-              <Text style={styles.dailyTaskText}>
+              <Text style={[styles.dailyTaskText, {color: activeColors.text}]}>
                 {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
               </Text>
 
@@ -220,7 +237,11 @@ const Dashboard = ({navigation}) => {
                     : toggleShowAddToDo
                 }>
                 {globalState.isDeleteMode ? (
-                  <Trash width={28} height={28} />
+                  theme.mode === 'light' ? (
+                    <Trash width={28} height={28} />
+                  ) : (
+                    <DarkTrash width={28} height={28} />
+                  )
                 ) : (
                   <Plus width={29} height={28} />
                 )}
@@ -253,6 +274,10 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 230,
   },
+  drawer: {
+    marginTop: hp('4%'),
+    marginLeft: wp('7%'),
+  },
   welcomeWrapping: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -270,21 +295,18 @@ const styles = StyleSheet.create({
   },
   greetingText: {
     fontSize: 20,
-    color: 'rgba(0, 0, 0, 0.85)',
     fontWeight: 'bold',
     textAlign: 'right',
     marginRight: wp('5%'),
     marginTop: hp('1%'),
   },
   taskListText: {
-    color: 'rgba(0, 0, 0, 0.85)',
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: hp('1%'),
     marginLeft: wp('7%'),
   },
   toDoContainer: {
-    backgroundColor: '#ECECEC',
     width: 306,
     height: 290,
     borderRadius: 8,
@@ -297,8 +319,7 @@ const styles = StyleSheet.create({
   },
   dailyTaskText: {
     fontSize: 17,
-    color: '#000000',
-    fontWeight: '500',
+    fontWeight: '700',
     marginLeft: wp('5%'),
     marginTop: hp('1%'),
   },

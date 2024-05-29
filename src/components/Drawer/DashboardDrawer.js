@@ -1,5 +1,5 @@
 import {DrawerContentScrollView} from '@react-navigation/drawer';
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   ImageBackground,
   StatusBar,
@@ -15,11 +15,17 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {deleteData} from '../Utils/AsyncStorage';
+import {colors} from '../config/theme';
+import {ThemeContext} from '../Context/ThemeContext';
 
 const DashboardDrawer = ({props, navigation}) => {
-  const [isEnabled, setIsEnabled] = useState(false);
+  const {theme, updateTheme} = useContext(ThemeContext);
+  let activeColors = colors[theme.mode];
+
+  const [isEnabled, setIsEnabled] = useState(theme.mode === 'dark');
 
   const toggleSwitch = () => {
+    updateTheme();
     setIsEnabled(prevState => !prevState);
   };
 
@@ -44,10 +50,13 @@ const DashboardDrawer = ({props, navigation}) => {
   return (
     <DrawerContentScrollView
       {...props}
-      contentContainerStyle={styles.container}>
+      contentContainerStyle={[
+        styles.container,
+        {backgroundColor: activeColors.primary},
+      ]}>
       <StatusBar
         translucent
-        barStyle={'dark-content'}
+        barStyle={theme.mode === 'light' ? 'dark-content' : activeColors.text}
         backgroundColor={'transparent'}
       />
 
@@ -59,19 +68,28 @@ const DashboardDrawer = ({props, navigation}) => {
 
       <View style={styles.settingsContainer}>
         <View style={styles.switchContainer}>
-          <Text style={styles.switchText}>Dark Mode</Text>
+          <Text style={[styles.switchText, {color: activeColors.text}]}>
+            Dark Mode
+          </Text>
           <Switch
             value={isEnabled}
             onValueChange={toggleSwitch}
-            trackColor={{false: '#c7c7c7', true: '#000000'}}
-            thumbColor={isEnabled ? '#ffffff' : '#000000'}
+            trackColor={{false: activeColors.switch, true: activeColors.switch}}
+            thumbColor={
+              isEnabled ? activeColors.switchThumb : activeColors.switchThumb
+            }
           />
         </View>
         <View style={{flex: 1}} />
         <TouchableOpacity
           onPress={() => deleteToken()}
-          style={styles.logOutbutton}>
-          <Text style={styles.logOutText}>Log Out</Text>
+          style={[
+            styles.logOutbutton,
+            {backgroundColor: activeColors.logOutbutton},
+          ]}>
+          <Text style={[styles.logOutText, {color: activeColors.logOutText}]}>
+            Log Out
+          </Text>
         </TouchableOpacity>
       </View>
     </DrawerContentScrollView>
@@ -109,7 +127,6 @@ const styles = StyleSheet.create({
   },
   switchText: {
     fontSize: 16,
-    color: '#000000',
     fontWeight: '500',
   },
   logOutbutton: {
@@ -124,7 +141,6 @@ const styles = StyleSheet.create({
   },
   logOutText: {
     fontSize: 16,
-    color: 'rgba(255, 0, 0, 0.85)',
     fontWeight: '500',
     textAlign: 'center',
   },

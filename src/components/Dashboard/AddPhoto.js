@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import {
   Text,
   View,
@@ -7,19 +7,27 @@ import {
   PermissionsAndroid,
   Platform,
   StyleSheet,
+  StatusBar,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import Camera from '../../assets/camera.svg';
+import DarkCamera from '../../assets/cameradark.svg';
 import Gallery from '../../assets/gallery.svg';
-import Trash from '../../assets/trashPhoto.svg';
+import DarkGallery from '../../assets/gallerydark.svg';
+import Trash from '../../assets/trashphoto.svg';
+import DarkTrash from '../../assets/trashphotodark.svg';
 import Axios from 'axios';
 import {useDispatch} from 'react-redux';
 import {Image as ImageCompressor} from 'react-native-compressor';
 import {BASE_API} from '../Utils/API';
 import {getDataAsync} from '../Utils/AsyncStorage';
+import {colors} from '../config/theme';
+import {ThemeContext} from '../Context/ThemeContext';
 
 const AddPhoto = ({onClose}) => {
+  const {theme} = useContext(ThemeContext);
+  let activeColors = colors[theme.mode];
   const dispatch = useDispatch();
 
   const options = {
@@ -148,20 +156,38 @@ const AddPhoto = ({onClose}) => {
   return (
     <TouchableWithoutFeedback onPress={onClose}>
       <View style={styles.container}>
-        <View style={styles.contentWrapping}>
-          <Text style={styles.profilePhotoText}>Profile Photo</Text>
+        <View
+          style={[
+            styles.contentWrapping,
+            {backgroundColor: activeColors.primary},
+          ]}>
+          <Text style={[styles.profilePhotoText, {color: activeColors.text}]}>
+            Profile Photo
+          </Text>
 
           <View style={styles.imageWrapping}>
             <TouchableOpacity onPress={() => getImage(true)}>
-              <Camera width={60} height={60} />
+              {theme.mode === 'light' ? (
+                <Camera width={60} height={60} />
+              ) : (
+                <DarkCamera width={60} height={60} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => getImage(false)}>
-              <Gallery width={60} height={60} />
+              {theme.mode === 'light' ? (
+                <Gallery width={60} height={60} />
+              ) : (
+                <DarkGallery width={60} height={60} />
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={deletePhotoUser}>
-              <Trash width={60} height={60} />
+              {theme.mode === 'light' ? (
+                <Trash width={60} height={60} />
+              ) : (
+                <DarkTrash width={60} height={60} />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -178,7 +204,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   contentWrapping: {
-    backgroundColor: '#FFFFFF',
     width: 271,
     height: 130,
     borderRadius: 20,
@@ -190,19 +215,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    paddingTop: 10,
+    paddingTop: hp('1%'),
     marginBottom: hp('40%'),
   },
   profilePhotoText: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#000000',
     textAlign: 'center',
   },
   imageWrapping: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 5,
+    marginTop: hp('1%'),
   },
 });
 
