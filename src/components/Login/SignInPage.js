@@ -17,6 +17,8 @@ import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
 import {storeData} from '../Utils/AsyncStorage';
 import {useDispatch} from 'react-redux';
+import LoginToast from '../Toast/LoginToast';
+import Toast from 'react-native-root-toast';
 
 const SignInPage = ({navigation}) => {
   const dispatch = useDispatch();
@@ -42,6 +44,37 @@ const SignInPage = ({navigation}) => {
     updateState('showPassword', !state.showPassword);
   };
 
+  const showCustomToast = () => {
+    const toast = Toast.show(<LoginToast message="Login Success" />, {
+      duration: Toast.durations.LONG,
+      position: Toast.positions.BOTTOM,
+      shadow: true,
+      animation: true,
+      hideOnPress: true,
+      delay: 0,
+      containerStyle: {
+        backgroundColor: '#50C2C9',
+        borderRadius: 30,
+        width: 200,
+        height: 60,
+      },
+      textStyle: {
+        color: '#fff',
+        fontSize: 16,
+      },
+      shadowStyle: {
+        shadowColor: '#000',
+        shadowOffset: {width: 0, height: 2},
+        shadowOpacity: 0.8,
+        shadowRadius: 2,
+      },
+    });
+
+    setTimeout(() => {
+      Toast.hide(toast);
+    }, 2000); // Duration in milliseconds (3.5 seconds)
+  };
+
   const loginHandler = async () => {
     const data = {
       email: state.signIn,
@@ -53,12 +86,10 @@ const SignInPage = ({navigation}) => {
       storeData('name', res.data.name);
       storeData('token', res.data.token);
       storeData('user_id', res.data.user_id);
-      Alert.alert('Warning!', 'Login success', [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('Dashboard'),
-        },
-      ]);
+      showCustomToast();
+      setTimeout(() => {
+        navigation.navigate('Dashboard');
+      }, 3000);
     } catch (error) {
       Alert.alert('Warning!', 'Email or Password is wrong!');
     }
@@ -121,9 +152,7 @@ const SignInPage = ({navigation}) => {
           <Text style={styles.forgotPasswordText}>Forgot Password ?</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => loginHandler()}
-          style={styles.loginButton}>
+        <TouchableOpacity onPress={loginHandler} style={styles.loginButton}>
           <Text style={styles.loginText}>Login</Text>
         </TouchableOpacity>
 

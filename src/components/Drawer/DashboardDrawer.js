@@ -32,19 +32,22 @@ const DashboardDrawer = ({props, navigation}) => {
   const deleteToken = async () => {
     try {
       await deleteData('token');
-      Alert.alert('Warning!', 'Are you sure you wan to log out?', [
-        {
-          text: 'Cancel',
-          onPress: () => console.log('Cancel Logout'),
-          style: 'cancel'
-        },
-        {
-          text: 'Yes, Logout',
-          onPress: () => navigation.navigate('SlashPage'),
-        },
-      ],
-      {cancelable: false}
-    );
+      Alert.alert(
+        'Warning!',
+        'Are you sure you wan to log out?',
+        [
+          {
+            text: 'Cancel',
+            onPress: () => console.log('Cancel Logout'),
+            style: 'cancel',
+          },
+          {
+            text: 'Yes, Logout',
+            onPress: () => navigation.navigate('SlashPage'),
+          },
+        ],
+        {cancelable: false},
+      );
     } catch (error) {
       console.error('Error logging out: ', error);
       Alert.alert(

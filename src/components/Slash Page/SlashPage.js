@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   ImageBackground,
   StatusBar,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   StyleSheet,
+  Animated,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -15,6 +16,33 @@ import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import SlashImage from '../../assets/slashimage.svg';
 
 const SlashPage = ({navigation}) => {
+  const moveAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    // Fungsi untuk memulai animasi
+    const startAnimation = () => {
+      // Reset posisi ke nilai awal
+      moveAnim.setValue(0);
+      // Mulai animasi
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(moveAnim, {
+            toValue: 10, // Menggerakkan gambar ke bawah
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(moveAnim, {
+            toValue: 0, // Menggerakkan gambar kembali ke atas
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ]),
+      ).start();
+    };
+
+    startAnimation();
+  }, []);
+
   return (
     <View style={styles.container}>
       <StatusBar
@@ -29,9 +57,14 @@ const SlashPage = ({navigation}) => {
       />
 
       <View style={styles.contentWrapping}>
-        <SlashImage height={261} width={270} />
+        <Animated.View
+          style={{
+            transform: [{translateY: moveAnim}],
+          }}>
+          <SlashImage height={261} width={270} />
+        </Animated.View>
         <Text style={styles.tittleText}>Get Things Done With TODO</Text>
-        <Text style={styles.descText}>Let’s Start your day now</Text>
+        <Text style={styles.descText}>Let’s start your day now</Text>
 
         <TouchableOpacity
           onPress={() => navigation.navigate('SignInPage')}

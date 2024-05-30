@@ -5,6 +5,8 @@ import Splash2 from '../../assets/splashchecklist.svg';
 import {getDataAsync} from '../Utils/AsyncStorage';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
+import LoginToast from '../Toast/LoginToast';
+import Toast from 'react-native-root-toast';
 
 const Loading = ({navigation}) => {
   const {theme, updateTheme} = useContext(ThemeContext);
@@ -16,6 +18,7 @@ const Loading = ({navigation}) => {
         const userToken = await getDataAsync('token');
         const timer = setTimeout(() => {
           if (userToken !== null) {
+            showCustomToast();
             navigation.navigate('Dashboard');
           } else {
             navigation.navigate('SlashPage');
@@ -39,6 +42,39 @@ const Loading = ({navigation}) => {
       } catch (error) {
         console.log('Restoring theme failed: ', error);
       }
+    };
+
+    const showCustomToast = () => {
+      const toast = Toast.show(<LoginToast message="Hello, Welcome Back" />, {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+        shadow: true,
+        animation: true,
+        hideOnPress: true,
+        delay: 0,
+        containerStyle: {
+          backgroundColor: '#50C2C9',
+          borderRadius: 30,
+          width: 250,
+          height: 60,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        textStyle: {
+          color: '#fff',
+          fontSize: 16,
+        },
+        shadowStyle: {
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.8,
+          shadowRadius: 2,
+        },
+      });
+
+      setTimeout(() => {
+        Toast.hide(toast);
+      }, 3000);
     };
 
     checkLoginStatus();

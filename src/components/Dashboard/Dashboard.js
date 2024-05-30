@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, {useState, useEffect, useCallback, useContext} from 'react';
 import {
   View,
   Text,
@@ -27,14 +27,14 @@ import DrawerMenu from '../../assets/drawer.svg';
 import ToDo from './ToDo';
 import AddToDo from './AddToDo';
 import AddPhoto from './AddPhoto';
-import { BASE_API } from '../Utils/API';
-import { useSelector, useDispatch } from 'react-redux';
-import { getDataAsync } from '../Utils/AsyncStorage';
-import { colors } from '../config/theme';
-import { ThemeContext } from '../Context/ThemeContext';
+import {BASE_API} from '../Utils/API';
+import {useSelector, useDispatch} from 'react-redux';
+import {getDataAsync} from '../Utils/AsyncStorage';
+import {colors} from '../config/theme';
+import {ThemeContext} from '../Context/ThemeContext';
 
-const Dashboard = ({ navigation }) => {
-  const { theme } = useContext(ThemeContext);
+const Dashboard = ({navigation}) => {
+  const {theme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
@@ -48,7 +48,7 @@ const Dashboard = ({ navigation }) => {
 
   const updateState = (key, value, isGlobal = false) => {
     if (isGlobal) {
-      dispatch({ type: key, inputValue: value });
+      dispatch({type: key, inputValue: value});
     } else {
       setState(prevState => ({
         ...prevState,
@@ -103,8 +103,8 @@ const Dashboard = ({ navigation }) => {
       greeting = 'Good Morning';
     } else if (currentHour >= 12 && currentHour < 18) {
       greeting = 'Good Afternoon';
-    }else if (currentHour >= 18 && currentHour < 21){
-      greeting = 'Good Evening'
+    } else if (currentHour >= 18 && currentHour < 21) {
+      greeting = 'Good Evening';
     }
 
     updateState('greeting', greeting);
@@ -151,7 +151,7 @@ const Dashboard = ({ navigation }) => {
     }
   };
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({item}) => (
     <ToDo key={item.id} list={item} onGet={getData} />
   );
 
@@ -174,7 +174,7 @@ const Dashboard = ({ navigation }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: activeColors.primary }]}>
+    <View style={[styles.container, {backgroundColor: activeColors.primary}]}>
       <Modal
         animationType="slide"
         transparent={true}
@@ -211,7 +211,7 @@ const Dashboard = ({ navigation }) => {
               <Image
                 source={
                   globalState.imageUri
-                    ? { uri: globalState.imageUri }
+                    ? {uri: globalState.imageUri}
                     : require('../../assets/user.png')
                 }
                 style={styles.userImage}
@@ -219,7 +219,7 @@ const Dashboard = ({ navigation }) => {
 
               <TouchableOpacity
                 onPress={handleCameraClick}
-                style={{ position: 'absolute', right: 30, top: 70, left: 80 }}>
+                style={{position: 'absolute', right: 30, top: 70, left: 80}}>
                 <Camera height={35} width={35} />
               </TouchableOpacity>
             </View>
@@ -228,21 +228,21 @@ const Dashboard = ({ navigation }) => {
         </ImageBackground>
 
         <View>
-          <Text style={[styles.greetingText, { color: activeColors.text }]}>
+          <Text style={[styles.greetingText, {color: activeColors.text}]}>
             {state.greeting}
           </Text>
           <Clock />
-          <Text style={[styles.taskListText, { color: activeColors.text }]}>
+          <Text style={[styles.taskListText, {color: activeColors.text}]}>
             Tasks List
           </Text>
 
           <View
             style={[
               styles.toDoContainer,
-              { backgroundColor: activeColors.secondary },
+              {backgroundColor: activeColors.secondary},
             ]}>
             <View style={styles.dailyTaskWrapping}>
-              <Text style={[styles.dailyTaskText, { color: activeColors.text }]}>
+              <Text style={[styles.dailyTaskText, {color: activeColors.text}]}>
                 {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
               </Text>
 
