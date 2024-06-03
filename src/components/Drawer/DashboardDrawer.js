@@ -102,7 +102,7 @@ const DashboardDrawer = ({navigation}) => {
             }
           />
         </View>
-        <View style={{flex: 1}} />
+        <View style={styles.wrapping} />
         <TouchableOpacity
           onPress={deleteData}
           style={[
@@ -150,6 +150,9 @@ const styles = StyleSheet.create({
   switchText: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  wrapping: {
+    flex: 1,
   },
   logOutbutton: {
     width: 221,

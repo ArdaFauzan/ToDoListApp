@@ -50,6 +50,7 @@ const ToDo = ({list, onGet}) => {
   };
 
   const updateToDo = async (todo_id, completed) => {
+    const user_id = await getDataAsync('user_id');
     const token = await getDataAsync('token');
 
     const data = {
@@ -62,7 +63,7 @@ const ToDo = ({list, onGet}) => {
           Authorization: `Bearer ${token}`,
         },
       });
-      onGet();
+      onGet(user_id, token);
     } catch (error) {
       console.error('Error updating data: ', error);
     }
@@ -107,7 +108,7 @@ const ToDo = ({list, onGet}) => {
             <TextInput
               value={state.editText}
               onChangeText={value => updateState('editText', value)}
-              style={styles.toDoTextInput}
+              style={[styles.toDoTextInput, {color: activeColors.text}]}
               onSubmitEditing={handleSave}
             />
 
@@ -171,7 +172,6 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderBottomWidth: 1,
     paddingRight: 2,
-    color: '#000000',
     paddingLeft: 6,
     marginRight: 100,
     width: '50%',

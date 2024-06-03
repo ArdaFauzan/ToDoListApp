@@ -31,7 +31,7 @@ const AddToDo = ({onGet, onClose}) => {
           },
         });
         setNewToDo('');
-        onGet();
+        onGet(user_id, token);
       } catch (error) {
         console.error('Error posting data: ', error);
       }
@@ -51,7 +51,7 @@ const AddToDo = ({onGet, onClose}) => {
       />
 
       <View style={styles.wrappingHandlerAdd}>
-        <TouchableOpacity onPress={postData}>
+        <TouchableOpacity onPress={() => postData()}>
           <Check height={20} width={20} />
         </TouchableOpacity>
 

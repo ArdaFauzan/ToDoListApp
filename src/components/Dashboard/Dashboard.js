@@ -127,6 +127,7 @@ const Dashboard = ({navigation}) => {
     updateState('showAddToDo', !state.showAddToDo);
 
   const deleteCheckedHandler = async () => {
+    const user_id = await getDataAsync('user_id');
     const token = await getDataAsync('token');
 
     if (globalState.checkedIds.length > 0) {
@@ -140,7 +141,7 @@ const Dashboard = ({navigation}) => {
             }),
           ),
         );
-        await getData();
+        await getData(user_id, token);
         updateState('CLEAR_CHECKED_IDS', [], true);
       } catch (error) {
         console.error('Error deleting todos: ', error);
@@ -216,7 +217,7 @@ const Dashboard = ({navigation}) => {
 
               <TouchableOpacity
                 onPress={handleCameraClick}
-                style={{position: 'absolute', right: 30, top: 70, left: 80}}>
+                style={styles.camera}>
                 <Camera height={35} width={35} />
               </TouchableOpacity>
             </View>
@@ -300,6 +301,12 @@ const styles = StyleSheet.create({
     height: 110,
     width: 110,
     borderRadius: 55,
+  },
+  camera: {
+    position: 'absolute',
+    right: 30,
+    top: 70,
+    left: 80,
   },
   welcomeText: {
     fontSize: 20,
