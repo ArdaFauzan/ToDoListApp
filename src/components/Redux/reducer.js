@@ -5,6 +5,7 @@ const initialDashboardState = {
   todos: [],
   checkedIds: [],
   imageUri: '',
+  loggedOut: false,
 };
 
 const DashboardReducer = (state = initialDashboardState, action) => {
@@ -41,6 +42,11 @@ const DashboardReducer = (state = initialDashboardState, action) => {
       return {
         ...state,
         imageUri: action.inputValue,
+      };
+    case 'SET_LOGGED_OUT':
+      return {
+        ...state,
+        loggedOut: action.inputValue,
       };
     default:
       return state;

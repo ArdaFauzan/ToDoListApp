@@ -7,10 +7,13 @@ import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
 import LoginToast from '../Toast/LoginToast';
 import Toast from 'react-native-root-toast';
+import {useSelector} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Loading = ({navigation}) => {
   const {theme, updateTheme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
+  const globalState = useSelector(state => state.DashboardReducer);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -77,6 +80,13 @@ const Loading = ({navigation}) => {
       }, 3000);
     };
 
+    const handleLogOut = async () => {
+      if (globalState.loggedOut) {
+        await AsyncStorage.clear();
+      }
+    };
+
+    handleLogOut();
     checkLoginStatus();
     fetchTheme();
   }, [navigation]);

@@ -7,7 +7,6 @@ import {
   PermissionsAndroid,
   Platform,
   StyleSheet,
-  StatusBar,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';

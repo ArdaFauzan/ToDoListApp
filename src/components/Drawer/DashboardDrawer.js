@@ -14,27 +14,34 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {deleteData} from '../Utils/AsyncStorage';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
+import {useDispatch} from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const DashboardDrawer = ({props, navigation}) => {
+const DashboardDrawer = ({navigation}) => {
   const {theme, updateTheme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
+  const dispatch = useDispatch();
 
   const [isEnabled, setIsEnabled] = useState(theme.mode === 'dark');
+
+  const updateState = (key, value, isGlobal = false) => {
+    if (isGlobal) {
+      dispatch({type: key, inputValue: value});
+    }
+  };
 
   const toggleSwitch = () => {
     updateTheme();
     setIsEnabled(prevState => !prevState);
   };
 
-  const deleteToken = async () => {
+  const deleteData = () => {
     try {
-      await deleteData('token');
       Alert.alert(
         'Warning!',
-        'Are you sure you wan to log out?',
+        'Are you sure you want to log out?',
         [
           {
             text: 'Cancel',
@@ -43,7 +50,13 @@ const DashboardDrawer = ({props, navigation}) => {
           },
           {
             text: 'Yes, Logout',
-            onPress: () => navigation.navigate('SlashPage'),
+            onPress: async () => {
+              await AsyncStorage.clear(); // Hapus semua data di AsyncStorage
+              updateState('SET_IMAGE_URI', null, true);
+              updateState('SET_TODOS', [], true);
+              updateState('SET_LOGGED_OUT', true, true);
+              navigation.navigate('SlashPage');
+            },
           },
         ],
         {cancelable: false},
@@ -59,14 +72,13 @@ const DashboardDrawer = ({props, navigation}) => {
 
   return (
     <DrawerContentScrollView
-      {...props}
       contentContainerStyle={[
         styles.container,
         {backgroundColor: activeColors.primary},
       ]}>
       <StatusBar
         translucent
-        barStyle={theme.mode === 'light' ? 'dark-content' : activeColors.text}
+        barStyle={theme.mode === 'light' ? 'dark-content' : 'light-content'}
         backgroundColor={'transparent'}
       />
 
@@ -92,7 +104,7 @@ const DashboardDrawer = ({props, navigation}) => {
         </View>
         <View style={{flex: 1}} />
         <TouchableOpacity
-          onPress={() => deleteToken()}
+          onPress={deleteData}
           style={[
             styles.logOutbutton,
             {backgroundColor: activeColors.logOutbutton},

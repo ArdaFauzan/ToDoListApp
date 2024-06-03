@@ -110,10 +110,7 @@ const Dashboard = ({navigation}) => {
     updateState('greeting', greeting);
   };
 
-  const getData = async () => {
-    const user_id = await getDataAsync('user_id');
-    const token = await getDataAsync('token');
-
+  const getData = async (user_id, token) => {
     try {
       const res = await Axios.get(`${BASE_API}/gettodo/${user_id}`, {
         headers: {
@@ -169,7 +166,7 @@ const Dashboard = ({navigation}) => {
       const user = res.data.url;
       updateState('SET_IMAGE_URI', user, true);
     } catch (error) {
-      console.error('Error fetching photo: ', error);
+      updateState('SET_IMAGE_URI', error.response.data.url, true);
     }
   };
 

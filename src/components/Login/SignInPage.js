@@ -72,7 +72,7 @@ const SignInPage = ({navigation}) => {
 
     setTimeout(() => {
       Toast.hide(toast);
-    }, 2000); // Duration in milliseconds (3.5 seconds)
+    }, 1000); // Duration in milliseconds (3.5 seconds)
   };
 
   const loginHandler = async () => {
@@ -89,7 +89,7 @@ const SignInPage = ({navigation}) => {
       showCustomToast();
       setTimeout(() => {
         navigation.navigate('Dashboard');
-      }, 3000);
+      }, 1000);
     } catch (error) {
       Alert.alert('Warning!', 'Email or Password is wrong!');
     }
