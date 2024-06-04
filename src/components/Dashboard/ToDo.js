@@ -191,16 +191,20 @@ const styles = StyleSheet.create({
   toDoListWrapping: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginRight: 20,
+    justifyContent: 'space-between',
+    flex: 1,
   },
   toDoList: {
     fontSize: 14,
     fontWeight: '400',
+    paddingRight: 50,
   },
   checkBoxWrapping: {
     position: 'absolute',
     right: 10,
-    left: 190,
-    bottom: 26,
+    left: 210,
+    justifyContent: 'center',
   },
   checkBox: {
     position: 'absolute',

@@ -234,46 +234,49 @@ const Dashboard = ({navigation}) => {
             Tasks List
           </Text>
 
-          <View
-            style={[
-              styles.toDoContainer,
-              {backgroundColor: activeColors.secondary},
-            ]}>
-            <View style={styles.dailyTaskWrapping}>
-              <Text style={[styles.dailyTaskText, {color: activeColors.text}]}>
-                {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
-              </Text>
+          <View style={styles.toDoContainer}>
+            <View
+              style={[
+                styles.toDoWrapping,
+                {backgroundColor: activeColors.secondary},
+              ]}>
+              <View style={styles.dailyTaskWrapping}>
+                <Text
+                  style={[styles.dailyTaskText, {color: activeColors.text}]}>
+                  {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
+                </Text>
 
-              <TouchableOpacity
-                style={styles.plusWrapping}
-                onPress={
-                  globalState.isDeleteMode
-                    ? deleteCheckedHandler
-                    : toggleShowAddToDo
-                }>
-                {globalState.isDeleteMode ? (
-                  theme.mode === 'light' ? (
-                    <Trash width={28} height={28} />
+                <TouchableOpacity
+                  style={styles.plusWrapping}
+                  onPress={
+                    globalState.isDeleteMode
+                      ? deleteCheckedHandler
+                      : toggleShowAddToDo
+                  }>
+                  {globalState.isDeleteMode ? (
+                    theme.mode === 'light' ? (
+                      <Trash width={28} height={28} />
+                    ) : (
+                      <DarkTrash width={28} height={28} />
+                    )
                   ) : (
-                    <DarkTrash width={28} height={28} />
-                  )
-                ) : (
-                  <Plus width={29} height={28} />
-                )}
-              </TouchableOpacity>
-            </View>
+                    <Plus width={29} height={28} />
+                  )}
+                </TouchableOpacity>
+              </View>
 
-            <FlatList
-              data={globalState.todos}
-              renderItem={renderItem}
-              keyExtractor={item => item.id.toString()}
-              style={styles.toDo}
-              ListHeaderComponent={
-                state.showAddToDo ? (
-                  <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
-                ) : null
-              }
-            />
+              <FlatList
+                data={globalState.todos}
+                renderItem={renderItem}
+                keyExtractor={item => item.id.toString()}
+                style={styles.toDo}
+                ListHeaderComponent={
+                  state.showAddToDo ? (
+                    <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
+                  ) : null
+                }
+              />
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -319,20 +322,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'right',
     marginRight: wp('5%'),
-    marginTop: hp('1%'),
+    marginTop: hp('2%'),
   },
   taskListText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: hp('1%'),
+    marginTop: hp('3%'),
     marginLeft: wp('7%'),
   },
   toDoContainer: {
+    alignItems: 'center',
+  },
+  toDoWrapping: {
     width: 306,
-    height: 290,
+    height: 320,
     borderRadius: 8,
     marginTop: hp('1%'),
-    marginHorizontal: wp('8%'),
   },
   dailyTaskWrapping: {
     justifyContent: 'space-between',
