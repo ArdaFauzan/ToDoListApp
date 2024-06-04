@@ -81,17 +81,21 @@ const SignInPage = ({navigation}) => {
       password: state.password,
     };
 
-    try {
-      const res = await Axios.post(`${BASE_API}/login`, data);
-      storeData('name', res.data.name);
-      storeData('token', res.data.token);
-      storeData('user_id', res.data.user_id);
-      showCustomToast();
-      setTimeout(() => {
-        navigation.navigate('Dashboard');
-      }, 1000);
-    } catch (error) {
-      Alert.alert('Warning!', 'Email or Password is wrong!');
+    if (!state.signIn || !state.password) {
+      Alert.alert('Warning!', 'Please fill in all fields');
+    } else {
+      try {
+        const res = await Axios.post(`${BASE_API}/login`, data);
+        storeData('name', res.data.name);
+        storeData('token', res.data.token);
+        storeData('user_id', res.data.user_id);
+        showCustomToast();
+        setTimeout(() => {
+          navigation.navigate('Dashboard');
+        }, 1000);
+      } catch (error) {
+        Alert.alert('Warning!', error.response.data.message);
+      }
     }
   };
 
