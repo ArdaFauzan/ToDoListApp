@@ -14,6 +14,8 @@ import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
+import AlertText from '../Texts/AlertText';
+import validator from 'email-validator';
 
 const RegisterPage = ({navigation}) => {
   const [state, setState] = useState({
@@ -22,6 +24,9 @@ const RegisterPage = ({navigation}) => {
     password: '',
     confirmPassword: '',
     showPassword: false,
+    showEmailAlert: false,
+    showPasswordAlert: false,
+    showConfirmPasswordAlert: false,
   });
 
   const updateState = (key, value) => {
@@ -54,10 +59,48 @@ const RegisterPage = ({navigation}) => {
   };
 
   const registerHandler = () => {
-    if (state.password !== state.confirmPassword) {
-      console.warn('Password do not match');
+    if (
+      !state.name ||
+      !state.email ||
+      !state.password ||
+      !state.confirmPassword
+    ) {
+      Alert.alert('Warning!', 'Please fill in all fields');
+    } else if (
+      state.showEmailAlert &&
+      state.showPasswordAlert &&
+      state.showConfirmPasswordAlert
+    ) {
+      Alert.alert('Warning!', 'Please, check again all field');
     } else {
       createNewUser();
+    }
+  };
+
+  const handleEmailValidation = text => {
+    updateState('email', text);
+    if (validator.validate(text)) {
+      updateState('showEmailAlert', false);
+    } else {
+      updateState('showEmailAlert', true);
+    }
+  };
+
+  const handlePasswordField = text => {
+    updateState('password', text);
+    if (state.password.length < 8) {
+      updateState('showPasswordAlert', true);
+    } else {
+      updateState('showPasswordAlert', false);
+    }
+  };
+
+  const handleConfirmPasswordField = text => {
+    updateState('confirmPassword', text);
+    if (state.password !== text) {
+      updateState('showConfirmPasswordAlert', true);
+    } else {
+      updateState('showConfirmPasswordAlert', false);
     }
   };
 
@@ -83,25 +126,30 @@ const RegisterPage = ({navigation}) => {
           onChangeText={value => updateState('name', value)}
           placeholder="Enter your Name"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          style={styles.textInput}
+          style={[styles.textInput, {marginBottom: hp('2%')}]}
         />
         <TextInput
           value={state.email}
-          onChangeText={value => updateState('email', value)}
+          onChangeText={value => handleEmailValidation(value)}
           placeholder="Enter your Email"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
           style={styles.textInput}
         />
 
+        {state.showEmailAlert ? (
+          <AlertText text={'Your email is wrong!'} />
+        ) : null}
+
         <View style={styles.passwordTextInputWrapping}>
           <TextInput
             value={state.password}
-            onChangeText={value => updateState('password', value)}
+            onChangeText={value => handlePasswordField(value)}
             placeholder="Enter your Password"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
             secureTextEntry={!state.showPassword}
             style={styles.passwordTextInput}
           />
+
           <TouchableOpacity
             style={styles.showPasswordTouch}
             onPress={showPasswordHandler}>
@@ -116,14 +164,22 @@ const RegisterPage = ({navigation}) => {
           </TouchableOpacity>
         </View>
 
+        {state.showPasswordAlert ? (
+          <AlertText text={'Your password must have min 8 character!'} />
+        ) : null}
+
         <TextInput
           value={state.confirmPassword}
-          onChangeText={value => updateState('confirmPassword', value)}
+          onChangeText={value => handleConfirmPasswordField(value)}
           placeholder="Confirm your Password"
           placeholderTextColor="rgba(0, 0, 0, 0.75)"
           secureTextEntry={true}
-          style={styles.textInput}
+          style={[styles.textInput, {marginTop: hp('2%')}]}
         />
+
+        {state.showConfirmPasswordAlert ? (
+          <AlertText text={'Password do not match!'} />
+        ) : null}
 
         <TouchableOpacity
           onPress={registerHandler}
@@ -174,14 +230,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#D8D8D8',
     color: 'black',
     fontSize: 14,
-    marginBottom: hp('2%'),
     borderRadius: 27,
     paddingLeft: 34,
     paddingRight: 20,
     fontWeight: '400',
   },
   passwordTextInputWrapping: {
-    marginBottom: hp('2%'),
+    marginTop: hp('2%'),
   },
   passwordTextInput: {
     width: 306,
@@ -208,7 +263,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 306,
     height: 83,
-    marginTop: hp('1%'),
+    marginTop: hp('2%'),
     borderRadius: 10,
   },
   buttonText: {
