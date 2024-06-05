@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingRight: 2,
     paddingLeft: 6,
-    marginRight: wp('25%'),
+    marginRight: wp('20%'),
     width: '54%',
   },
   wrappingHandlerEdit: {

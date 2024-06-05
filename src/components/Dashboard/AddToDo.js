@@ -81,13 +81,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingRight: 2,
     paddingLeft: 6,
-    marginLeft: wp('9%'),
+    marginLeft: wp('8%'),
     marginTop: hp('-1%'),
     width: '50%',
   },
   wrappingHandlerAdd: {
     position: 'absolute',
-    right: 30,
+    right: 20,
     flexDirection: 'row',
   },
   close: {
