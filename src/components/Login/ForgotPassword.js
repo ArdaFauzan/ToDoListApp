@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    height: hp('20%'),
-    width: wp('50%'),
+    height: deviceHeight / 4,
+    width: deviceWidth / 2,
   },
   contentWrapping: {
     justifyContent: 'center',

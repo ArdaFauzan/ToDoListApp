@@ -10,10 +10,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import SignInImage from '../../assets/signinimage.svg';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
@@ -21,6 +18,7 @@ import {storeData} from '../Utils/AsyncStorage';
 import {useDispatch} from 'react-redux';
 import LoginToast from '../Toast/LoginToast';
 import Toast from 'react-native-root-toast';
+import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 
 const SignInPage = ({navigation}) => {
   const dispatch = useDispatch();
@@ -178,8 +176,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    height: hp('20%'),
-    width: wp('50%'),
+    height: deviceHeight / 4,
+    width: deviceWidth / 2,
   },
   contentWrapping: {
     justifyContent: 'center',

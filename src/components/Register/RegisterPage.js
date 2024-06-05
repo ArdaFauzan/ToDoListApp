@@ -10,10 +10,7 @@ import {
   Image,
   Alert,
 } from 'react-native';
-import {
-  widthPercentageToDP as wp,
-  heightPercentageToDP as hp,
-} from 'react-native-responsive-screen';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
@@ -213,8 +210,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   background: {
-    height: hp('20%'),
-    width: wp('50%'),
+    height: deviceHeight / 4,
+    width: deviceWidth / 2,
   },
   tittleText: {
     fontSize: 20,

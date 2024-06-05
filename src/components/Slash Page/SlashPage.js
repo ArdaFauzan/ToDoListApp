@@ -13,6 +13,7 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import SlashImage from '../../assets/slashimage.svg';
+import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 
 const SlashPage = ({navigation}) => {
   const moveAnim = useRef(new Animated.Value(0)).current;
@@ -80,8 +81,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    height: hp('20%'),
-    width: wp('50%'),
+    height: deviceHeight / 4,
+    width: deviceWidth / 2,
   },
   contentWrapping: {
     justifyContent: 'center',
