@@ -1,5 +1,6 @@
 import React from 'react';
 import {Text, View, StyleSheet} from 'react-native';
+import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 
 const AlertText = ({text}) => {
   return (
@@ -13,7 +14,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'flex-start',
     alignSelf: 'flex-start',
-    marginLeft: 60,
+    marginLeft: wp('14%'),
   },
   text: {
     fontSize: 12,

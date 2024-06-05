@@ -158,7 +158,7 @@ const ToDo = ({list, onGet}) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 19,
+    marginBottom: hp('3%'),
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -167,31 +167,31 @@ const styles = StyleSheet.create({
     width: 24,
     marginRight: 15,
   },
+  containerIsEditing: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   toDoTextInput: {
     height: 40,
     borderColor: 'gray',
     borderBottomWidth: 1,
     paddingRight: 2,
     paddingLeft: 6,
-    marginRight: 100,
-    width: '50%',
-  },
-  containerIsEditing: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginRight: wp('19%'),
+    width: '54%',
   },
   wrappingHandlerEdit: {
     position: 'absolute',
-    right: 30,
+    right: 40,
     flexDirection: 'row',
   },
   close: {
-    marginLeft: 20,
+    marginLeft: wp('4%'),
   },
   toDoListWrapping: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 20,
+    marginRight: wp('8%'),
     justifyContent: 'space-between',
     flex: 1,
   },
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
   },
   checkBox: {
     position: 'absolute',
-    right: 10,
+    right: 40,
   },
 });
 

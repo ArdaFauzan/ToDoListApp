@@ -54,6 +54,7 @@ const AddToDo = ({onGet, onClose}) => {
         placeholderTextColor={activeColors.text}
         onChangeText={text => setNewToDo(text)}
         value={newToDo}
+        multiline
       />
 
       <View style={styles.wrappingHandlerAdd}>
@@ -80,9 +81,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingRight: 2,
     paddingLeft: 6,
-    marginRight: 100,
-    marginLeft: 35,
-    marginTop: 2,
+    marginLeft: wp('7%'),
+    marginTop: hp('-1%'),
     width: '50%',
   },
   wrappingHandlerAdd: {
@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   close: {
-    marginLeft: 20,
+    marginLeft: wp('4%'),
   },
 });
 

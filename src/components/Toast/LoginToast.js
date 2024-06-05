@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, Text, Image, StyleSheet} from 'react-native';
+import {widthPercentageToDP as wp} from 'react-native-responsive-screen';
 
 const LoginToast = ({message}) => (
   <View style={styles.toastContainer}>
@@ -19,7 +20,7 @@ const styles = StyleSheet.create({
   image: {
     width: 30,
     height: 30,
-    marginRight: 10,
+    marginRight: wp('2%'),
   },
   text: {
     color: '#ffffff',

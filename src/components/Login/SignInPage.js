@@ -92,9 +92,9 @@ const SignInPage = ({navigation}) => {
         updateState('SET_USER_ID', res.data.user_id, true);
         updateState('SET_TOKEN', res.data.token, true);
         showCustomToast();
-        // setTimeout(() => {
-        //   navigation.navigate('Dashboard');
-        // }, 1000);
+        setTimeout(() => {
+          navigation.navigate('Dashboard');
+        }, 1000);
       } catch (error) {
         Alert.alert('Warning!', error.response.data.message);
       }
