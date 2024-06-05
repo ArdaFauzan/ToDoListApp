@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   background: {
     height: deviceHeight / 4,
-    width: deviceWidth / 2,
+    width: deviceWidth * 0.56,
   },
   tittleText: {
     fontSize: 20,
