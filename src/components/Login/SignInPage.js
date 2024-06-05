@@ -10,8 +10,10 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
-import {deviceHeight, deviceWidth} from '../Utils/Dimension';
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from 'react-native-responsive-screen';
 import SignInImage from '../../assets/signinimage.svg';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
@@ -176,8 +178,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    height: deviceHeight / 5,
-    width: deviceWidth / 2,
+    height: hp('20%'),
+    width: wp('50%'),
   },
   contentWrapping: {
     justifyContent: 'center',

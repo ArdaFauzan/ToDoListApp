@@ -105,6 +105,7 @@ const CreateNewPassword = ({navigation, route}) => {
             />
           </TouchableOpacity>
         </View>
+
         <Text style={styles.text}>Confirm Password*</Text>
 
         <TextInput
@@ -130,8 +131,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    height: deviceHeight / 5,
-    width: deviceWidth / 2,
+    height: hp('20%'),
+    width: wp('50%'),
   },
   contentWrapping: {
     justifyContent: 'center',
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
   },
   showPasswordTouch: {
     position: 'absolute',
-    right: 60,
+    right: 100,
     top: 15,
   },
   eyeImage: {

@@ -12,7 +12,6 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import {deviceHeight, deviceWidth} from '../Utils/Dimension';
 import SlashImage from '../../assets/slashimage.svg';
 
 const SlashPage = ({navigation}) => {
@@ -81,8 +80,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   background: {
-    height: deviceHeight / 5,
-    width: deviceWidth / 2,
+    height: hp('20%'),
+    width: wp('50%'),
   },
   contentWrapping: {
     justifyContent: 'center',

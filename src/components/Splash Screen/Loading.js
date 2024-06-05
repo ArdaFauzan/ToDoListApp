@@ -7,6 +7,7 @@ import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
 import LoginToast from '../Toast/LoginToast';
 import Toast from 'react-native-root-toast';
+import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {useDispatch, useSelector} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -32,7 +33,7 @@ const Loading = ({navigation}) => {
             updateState('SET_USER_ID', user_id, true);
             updateState('SET_TOKEN', userToken, true);
             showCustomToast();
-            //navigation.navigate('Dashboard');
+            navigation.navigate('Dashboard');
           } else {
             navigation.navigate('SlashPage');
           }
@@ -109,11 +110,11 @@ const Loading = ({navigation}) => {
         backgroundColor={'transparent'}
       />
 
-      <View style={styles.splash1}>
-        <Splash1 width={57} height={57} />
-      </View>
+      <View style={styles.contentWrapping}>
+        <View style={styles.splash1}>
+          <Splash1 width={57} height={57} />
+        </View>
 
-      <View style={styles.splash2}>
         <Splash2 width={156} height={168} />
       </View>
     </View>
@@ -123,19 +124,15 @@ const Loading = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  contentWrapping: {
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
+    flex: 1,
   },
   splash1: {
-    position: 'relative',
-    right: 100,
-    bottom: 80,
-    marginLeft: 70,
-  },
-  splash2: {
-    position: 'absolute',
-    left: 150,
+    marginBottom: hp('20%'),
   },
 });
 
