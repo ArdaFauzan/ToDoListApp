@@ -110,6 +110,7 @@ const ToDo = ({list, onGet}) => {
               onChangeText={value => updateState('editText', value)}
               style={[styles.toDoTextInput, {color: activeColors.text}]}
               onSubmitEditing={handleSave}
+              multiline
             />
 
             <View style={styles.wrappingHandlerEdit}>
@@ -177,12 +178,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingRight: 2,
     paddingLeft: 6,
-    marginRight: wp('19%'),
+    marginRight: wp('25%'),
     width: '54%',
   },
   wrappingHandlerEdit: {
     position: 'absolute',
-    right: 40,
+    right: 35,
     flexDirection: 'row',
   },
   close: {

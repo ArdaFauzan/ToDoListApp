@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     paddingRight: 2,
     paddingLeft: 6,
-    marginLeft: wp('7%'),
+    marginLeft: wp('9%'),
     marginTop: hp('-1%'),
     width: '50%',
   },
