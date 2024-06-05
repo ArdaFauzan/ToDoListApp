@@ -17,13 +17,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: 40,
-    height: 40,
+    width: 30,
+    height: 30,
     marginRight: 10,
   },
   text: {
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '500',
   },
 });

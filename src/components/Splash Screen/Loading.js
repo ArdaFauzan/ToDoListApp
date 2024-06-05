@@ -32,7 +32,7 @@ const Loading = ({navigation}) => {
             updateState('SET_USER_ID', user_id, true);
             updateState('SET_TOKEN', userToken, true);
             showCustomToast();
-            navigation.navigate('Dashboard');
+            //navigation.navigate('Dashboard');
           } else {
             navigation.navigate('SlashPage');
           }
@@ -68,7 +68,7 @@ const Loading = ({navigation}) => {
         containerStyle: {
           backgroundColor: '#50C2C9',
           borderRadius: 30,
-          width: 250,
+          width: 210,
           height: 60,
           justifyContent: 'center',
           alignItems: 'center',
@@ -94,13 +94,6 @@ const Loading = ({navigation}) => {
       if (globalState.loggedOut) {
         await AsyncStorage.clear();
       }
-    };
-
-    const getDataLocal = async () => {
-     
-      const token = await getDataAsync('token');
-
-      
     };
 
     handleLogOut();

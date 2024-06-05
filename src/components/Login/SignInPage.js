@@ -55,12 +55,10 @@ const SignInPage = ({navigation}) => {
       containerStyle: {
         backgroundColor: '#50C2C9',
         borderRadius: 30,
-        width: 200,
-        height: 60,
-      },
-      textStyle: {
-        color: '#fff',
-        fontSize: 16,
+        width: 170,
+        height: 50,
+        justifyContent: 'center',
+        alignItems: 'center',
       },
       shadowStyle: {
         shadowColor: '#000',
@@ -92,9 +90,9 @@ const SignInPage = ({navigation}) => {
         updateState('SET_USER_ID', res.data.user_id, true);
         updateState('SET_TOKEN', res.data.token, true);
         showCustomToast();
-        setTimeout(() => {
-          navigation.navigate('Dashboard');
-        }, 1000);
+        // setTimeout(() => {
+        //   navigation.navigate('Dashboard');
+        // }, 1000);
       } catch (error) {
         Alert.alert('Warning!', error.response.data.message);
       }
