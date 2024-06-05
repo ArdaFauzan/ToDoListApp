@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Alert,
+  BackHandler,
   Image,
   ImageBackground,
   StatusBar,
@@ -17,12 +18,15 @@ import {
 } from 'react-native-responsive-screen';
 import Axios from 'axios';
 import {BASE_API} from '../Utils/API';
+import Toast from 'react-native-root-toast';
+import LoginToast from '../Toast/LoginToast';
 
 const CreateNewPassword = ({navigation, route}) => {
   const [state, setState] = useState({
     password: '',
     confirmPassword: '',
     showPassword: false,
+    backPressedOnce: false,
   });
 
   const {data} = route.params;
@@ -32,6 +36,60 @@ const CreateNewPassword = ({navigation, route}) => {
       ...prevState,
       [key]: value,
     }));
+  };
+
+  const onBackPress = useCallback(() => {
+    if (state.backPressedOnce) {
+      BackHandler.exitApp();
+      return true;
+    } else {
+      updateState('backPressedOnce', true);
+      showCustomToast();
+      setTimeout(() => {
+        updateState('backPressedOnce', false);
+      }, 2000);
+      return true;
+    }
+  }, [state.backPressedOnce]);
+
+  useEffect(() => {
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+    return () => {
+      BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    };
+  }, [onBackPress]);
+
+  const showCustomToast = () => {
+    const toast = Toast.show(
+      <LoginToast message="Press again to close the app" />,
+      {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+        shadow: true,
+        animation: true,
+        hideOnPress: true,
+        delay: 0,
+        containerStyle: {
+          backgroundColor: '#50C2C9',
+          borderRadius: 30,
+          width: 250,
+          height: 50,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        shadowStyle: {
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.8,
+          shadowRadius: 2,
+        },
+      },
+    );
+
+    setTimeout(() => {
+      Toast.hide(toast);
+    }, 1000); // Duration in milliseconds (1 second)
   };
 
   const createNewPassword = async () => {
@@ -77,7 +135,7 @@ const CreateNewPassword = ({navigation, route}) => {
         <View style={styles.tittleWrapping}>
           <Text style={styles.tittleText}>Create a new password</Text>
           <Text style={styles.descText}>
-            Your new password must be different from the previos password you
+            Your new password must be different from the previous password you
             used
           </Text>
         </View>

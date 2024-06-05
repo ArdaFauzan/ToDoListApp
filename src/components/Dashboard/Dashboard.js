@@ -32,6 +32,8 @@ import {useSelector, useDispatch} from 'react-redux';
 import {getDataAsync} from '../Utils/AsyncStorage';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
+import Toast from 'react-native-root-toast';
+import LoginToast from '../Toast/LoginToast';
 
 const Dashboard = ({navigation}) => {
   const {theme} = useContext(ThemeContext);
@@ -44,6 +46,8 @@ const Dashboard = ({navigation}) => {
     showModal: false,
     userName: '',
     greeting: '',
+    showExitAlert: false,
+    backPressedOnce: false,
   });
 
   const updateState = (key, value, isGlobal = false) => {
@@ -62,8 +66,19 @@ const Dashboard = ({navigation}) => {
       updateState('SET_DELETEMODE', false, true);
       return true;
     }
-    return false;
-  }, [globalState.isDeleteMode]);
+
+    if (state.backPressedOnce) {
+      BackHandler.exitApp();
+      return true;
+    } else {
+      updateState('backPressedOnce', true);
+      showCustomToast();
+      setTimeout(() => {
+        updateState('backPressedOnce', false);
+      }, 2000);
+      return true;
+    }
+  }, [state.backPressedOnce, globalState.isDeleteMode]);
 
   useEffect(() => {
     initializeDashboard();
@@ -91,6 +106,38 @@ const Dashboard = ({navigation}) => {
         'An error occurred while initializing the dashboard. Please try again.',
       );
     }
+  };
+
+  const showCustomToast = () => {
+    const toast = Toast.show(
+      <LoginToast message="Press again to close the app" />,
+      {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.BOTTOM,
+        shadow: true,
+        animation: true,
+        hideOnPress: true,
+        delay: 0,
+        containerStyle: {
+          backgroundColor: '#50C2C9',
+          borderRadius: 30,
+          width: 250,
+          height: 50,
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        shadowStyle: {
+          shadowColor: '#000',
+          shadowOffset: {width: 0, height: 2},
+          shadowOpacity: 0.8,
+          shadowRadius: 2,
+        },
+      },
+    );
+
+    setTimeout(() => {
+      Toast.hide(toast);
+    }, 1000); // Duration in milliseconds (3.5 seconds)
   };
 
   const setGreetingMessage = () => {
