@@ -9,6 +9,7 @@ import {
   ImageBackground,
   Image,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import {deviceHeight, deviceWidth} from '../Utils/Dimension';
@@ -106,97 +107,99 @@ const RegisterPage = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        translucent
-        barStyle={'dark-content'}
-        backgroundColor={'transparent'}
-      />
-
-      <ImageBackground
-        source={require('../../assets/Elipse.png')}
-        style={styles.background}
-      />
-
-      <View style={styles.contentWrapping}>
-        <Text style={styles.tittleText}>Welcome OnBoard !</Text>
-        <Text style={styles.descText}>Let’s checkup your tasks!</Text>
-
-        <TextInput
-          value={state.name}
-          onChangeText={value => updateState('name', value)}
-          placeholder="Enter your Name"
-          placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          style={[styles.textInput, {marginBottom: hp('2%')}]}
-        />
-        <TextInput
-          value={state.email}
-          onChangeText={value => handleEmailValidation(value)}
-          placeholder="Enter your Email"
-          placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          style={styles.textInput}
+      <KeyboardAvoidingView behavior="position">
+        <StatusBar
+          translucent
+          barStyle={'dark-content'}
+          backgroundColor={'transparent'}
         />
 
-        {state.showEmailAlert ? (
-          <AlertText text={'Your email is wrong!'} />
-        ) : null}
+        <ImageBackground
+          source={require('../../assets/Elipse.png')}
+          style={styles.background}
+        />
 
-        <View style={styles.passwordTextInputWrapping}>
+        <View style={styles.contentWrapping}>
+          <Text style={styles.tittleText}>Welcome OnBoard !</Text>
+          <Text style={styles.descText}>Let’s checkup your tasks!</Text>
+
           <TextInput
-            value={state.password}
-            onChangeText={value => handlePasswordField(value)}
-            placeholder="Enter your Password"
+            value={state.name}
+            onChangeText={value => updateState('name', value)}
+            placeholder="Enter your Name"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            secureTextEntry={!state.showPassword}
-            style={styles.passwordTextInput}
+            style={[styles.textInput, {marginBottom: hp('2%')}]}
+          />
+          <TextInput
+            value={state.email}
+            onChangeText={value => handleEmailValidation(value)}
+            placeholder="Enter your Email"
+            placeholderTextColor="rgba(0, 0, 0, 0.75)"
+            style={styles.textInput}
           />
 
-          <TouchableOpacity
-            style={styles.showPasswordTouch}
-            onPress={showPasswordHandler}>
-            <Image
-              source={
-                state.showPassword
-                  ? require('../../assets/hide.png')
-                  : require('../../assets/view.png')
-              }
-              style={styles.eyeImage}
+          {state.showEmailAlert ? (
+            <AlertText text={'Your email is wrong!'} />
+          ) : null}
+
+          <View style={styles.passwordTextInputWrapping}>
+            <TextInput
+              value={state.password}
+              onChangeText={value => handlePasswordField(value)}
+              placeholder="Enter your Password"
+              placeholderTextColor="rgba(0, 0, 0, 0.75)"
+              secureTextEntry={!state.showPassword}
+              style={styles.passwordTextInput}
             />
+
+            <TouchableOpacity
+              style={styles.showPasswordTouch}
+              onPress={showPasswordHandler}>
+              <Image
+                source={
+                  state.showPassword
+                    ? require('../../assets/hide.png')
+                    : require('../../assets/view.png')
+                }
+                style={styles.eyeImage}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {state.showPasswordAlert ? (
+            <AlertText text={'Your password must have min 8 character!'} />
+          ) : null}
+
+          <TextInput
+            value={state.confirmPassword}
+            onChangeText={value => handleConfirmPasswordField(value)}
+            placeholder="Confirm your Password"
+            placeholderTextColor="rgba(0, 0, 0, 0.75)"
+            secureTextEntry={true}
+            style={[styles.textInput, {marginTop: hp('2%')}]}
+          />
+
+          {state.showConfirmPasswordAlert ? (
+            <AlertText text={'Password do not match!'} />
+          ) : null}
+
+          <TouchableOpacity
+            onPress={registerHandler}
+            style={styles.buttonWrapping}>
+            <Text style={styles.buttonText}>Get Started</Text>
           </TouchableOpacity>
+
+          <View style={styles.alreadyAccountWrapping}>
+            <Text style={styles.alreadyAccountText}>
+              Already have a account ?
+            </Text>
+
+            <TouchableOpacity onPress={() => navigation.navigate('SignInPage')}>
+              <Text style={styles.signInText}> Sign In</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        {state.showPasswordAlert ? (
-          <AlertText text={'Your password must have min 8 character!'} />
-        ) : null}
-
-        <TextInput
-          value={state.confirmPassword}
-          onChangeText={value => handleConfirmPasswordField(value)}
-          placeholder="Confirm your Password"
-          placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          secureTextEntry={true}
-          style={[styles.textInput, {marginTop: hp('2%')}]}
-        />
-
-        {state.showConfirmPasswordAlert ? (
-          <AlertText text={'Password do not match!'} />
-        ) : null}
-
-        <TouchableOpacity
-          onPress={registerHandler}
-          style={styles.buttonWrapping}>
-          <Text style={styles.buttonText}>Get Started</Text>
-        </TouchableOpacity>
-
-        <View style={styles.alreadyAccountWrapping}>
-          <Text style={styles.alreadyAccountText}>
-            Already have a account ?
-          </Text>
-
-          <TouchableOpacity onPress={() => navigation.navigate('SignInPage')}>
-            <Text style={styles.signInText}> Sign In</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

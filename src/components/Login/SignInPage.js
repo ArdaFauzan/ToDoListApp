@@ -9,6 +9,7 @@ import {
   Text,
   StyleSheet,
   Alert,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
 import SignInImage from '../../assets/signinimage.svg';
@@ -101,72 +102,77 @@ const SignInPage = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        translucent
-        barStyle={'dark-content'}
-        backgroundColor={'transparent'}
-      />
-
-      <ImageBackground
-        source={require('../../assets/Elipse.png')}
-        style={styles.background}
-      />
-
-      <View style={styles.contentWrapping}>
-        <Text style={styles.tittleText}>Welcome Back!</Text>
-
-        <View style={{marginBottom: hp('2%')}}>
-          <SignInImage height={152} width={153} />
-        </View>
-
-        <TextInput
-          value={state.signIn}
-          onChangeText={value => updateState('signIn', value)}
-          placeholder="Enter your Email"
-          placeholderTextColor="rgba(0, 0, 0, 0.75)"
-          style={styles.emailTextInput}
+      <KeyboardAvoidingView behavior="position">
+        <StatusBar
+          translucent
+          barStyle={'dark-content'}
+          backgroundColor={'transparent'}
         />
 
-        <View style={styles.passwordWrapping}>
+        <ImageBackground
+          source={require('../../assets/Elipse.png')}
+          style={styles.background}
+        />
+
+        <View style={styles.contentWrapping}>
+          <Text style={styles.tittleText}>Welcome Back!</Text>
+
+          <View style={{marginBottom: hp('2%')}}>
+            <SignInImage height={152} width={153} />
+          </View>
+
           <TextInput
-            value={state.password}
-            onChangeText={value => updateState('password', value)}
-            placeholder="Enter your Password"
+            value={state.signIn}
+            onChangeText={value => updateState('signIn', value)}
+            placeholder="Enter your Email"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
-            secureTextEntry={!state.showPassword}
-            style={styles.passwordTextInput}
+            style={styles.emailTextInput}
           />
-          <TouchableOpacity
-            style={styles.showPasswordTouch}
-            onPress={showPasswordHandler}>
-            <Image
-              source={
-                state.showPassword
-                  ? require('../../assets/hide.png')
-                  : require('../../assets/view.png')
-              }
-              style={styles.eyeImage}
+
+          <View style={styles.passwordWrapping}>
+            <TextInput
+              value={state.password}
+              onChangeText={value => updateState('password', value)}
+              placeholder="Enter your Password"
+              placeholderTextColor="rgba(0, 0, 0, 0.75)"
+              secureTextEntry={!state.showPassword}
+              style={styles.passwordTextInput}
             />
+            <TouchableOpacity
+              style={styles.showPasswordTouch}
+              onPress={showPasswordHandler}>
+              <Image
+                source={
+                  state.showPassword
+                    ? require('../../assets/hide.png')
+                    : require('../../assets/view.png')
+                }
+                style={styles.eyeImage}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => navigation.navigate('ForgotPassword')}
+            style={styles.forgotPassword}>
+            <Text style={styles.forgotPasswordText}>Forgot Password ?</Text>
           </TouchableOpacity>
-        </View>
 
-        <TouchableOpacity
-          onPress={() => navigation.navigate('ForgotPassword')}
-          style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot Password ?</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={loginHandler} style={styles.loginButton}>
-          <Text style={styles.loginText}>Login</Text>
-        </TouchableOpacity>
-
-        <View style={styles.dontHaveAccountWrapping}>
-          <Text style={styles.dontHaveAccountText}>Don’t have an account?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('RegisterPage')}>
-            <Text style={styles.signUpText}> Sign Up</Text>
+          <TouchableOpacity onPress={loginHandler} style={styles.loginButton}>
+            <Text style={styles.loginText}>Login</Text>
           </TouchableOpacity>
+
+          <View style={styles.dontHaveAccountWrapping}>
+            <Text style={styles.dontHaveAccountText}>
+              Don’t have an account?
+            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('RegisterPage')}>
+              <Text style={styles.signUpText}> Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };

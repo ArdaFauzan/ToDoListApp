@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
   container: {
     justifyContent: 'flex-start',
     alignSelf: 'flex-start',
-    marginLeft: wp('14%'),
+    marginLeft: wp('17%'),
   },
   text: {
     fontSize: 12,

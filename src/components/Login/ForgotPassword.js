@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {
   Alert,
   ImageBackground,
+  KeyboardAvoidingView,
   StatusBar,
   StyleSheet,
   Text,
@@ -54,46 +55,48 @@ const ForgotPassword = ({navigation}) => {
   };
   return (
     <View style={styles.container}>
-      <StatusBar
-        translucent
-        barStyle={'dark-content'}
-        backgroundColor={'transparent'}
-      />
+      <KeyboardAvoidingView behavior="position">
+        <StatusBar
+          translucent
+          barStyle={'dark-content'}
+          backgroundColor={'transparent'}
+        />
 
-      <ImageBackground
-        source={require('../../assets/Elipse.png')}
-        style={styles.background}
-      />
+        <ImageBackground
+          source={require('../../assets/Elipse.png')}
+          style={styles.background}
+        />
 
-      <View style={styles.contentWrapping}>
-        <View style={styles.tittleWrapping}>
-          <Text style={styles.tittleText}>Forgot your password?</Text>
-          <Text style={styles.descText}>
-            Please, enter your name and email address in your account below
-          </Text>
+        <View style={styles.contentWrapping}>
+          <View style={styles.tittleWrapping}>
+            <Text style={styles.tittleText}>Forgot your password?</Text>
+            <Text style={styles.descText}>
+              Please, enter your name and email address in your account below
+            </Text>
+          </View>
+
+          <Text style={styles.text}>Name*</Text>
+
+          <TextInput
+            value={state.name}
+            onChangeText={value => updateState('name', value)}
+            placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
+            style={styles.nameTextInput}
+          />
+          <Text style={styles.text}>E-mail address*</Text>
+
+          <TextInput
+            value={state.email}
+            onChangeText={value => updateState('email', value)}
+            placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
+            style={styles.emailTextInput}
+          />
+
+          <TouchableOpacity onPress={checkUser} style={styles.buttonWrapping}>
+            <Text style={styles.buttonText}>Confirm</Text>
+          </TouchableOpacity>
         </View>
-
-        <Text style={styles.text}>Name*</Text>
-
-        <TextInput
-          value={state.name}
-          onChangeText={value => updateState('name', value)}
-          placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
-          style={styles.nameTextInput}
-        />
-        <Text style={styles.text}>E-mail address*</Text>
-
-        <TextInput
-          value={state.email}
-          onChangeText={value => updateState('email', value)}
-          placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
-          style={styles.emailTextInput}
-        />
-
-        <TouchableOpacity onPress={checkUser} style={styles.buttonWrapping}>
-          <Text style={styles.buttonText}>Confirm</Text>
-        </TouchableOpacity>
-      </View>
+      </KeyboardAvoidingView>
     </View>
   );
 };
