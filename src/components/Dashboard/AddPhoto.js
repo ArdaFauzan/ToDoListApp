@@ -17,10 +17,9 @@ import DarkGallery from '../../assets/gallerydark.svg';
 import Trash from '../../assets/trashphoto.svg';
 import DarkTrash from '../../assets/trashphotodark.svg';
 import Axios from 'axios';
-import {useDispatch} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {Image as ImageCompressor} from 'react-native-compressor';
 import {BASE_API} from '../Utils/API';
-import {getDataAsync} from '../Utils/AsyncStorage';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
 
@@ -28,6 +27,7 @@ const AddPhoto = ({onClose}) => {
   const {theme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
   const dispatch = useDispatch();
+  const globalState = useSelector(state => state.DashboardReducer);
 
   const options = {
     saveToPhotos: true,
@@ -89,8 +89,6 @@ const AddPhoto = ({onClose}) => {
 
   const postPhotoUser = async uri => {
     const formData = new FormData();
-    const user_id = await getDataAsync('user_id');
-    const token = await getDataAsync('token');
     const fileExtension = uri.split('.').pop();
     let mimeType = 'image/jpeg';
 
@@ -121,13 +119,13 @@ const AddPhoto = ({onClose}) => {
 
     try {
       const response = await Axios.post(
-        `${BASE_API}/uploadphoto/${user_id}`,
+        `${BASE_API}/uploadphoto/${globalState.user_id}`,
         formData,
         {
           headers: {
             Accept: 'application/json',
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${globalState.token}`,
           },
         },
       );
@@ -138,14 +136,15 @@ const AddPhoto = ({onClose}) => {
   };
 
   const deletePhotoUser = async () => {
-    const user_id = await getDataAsync('user_id');
-    const token = await getDataAsync('token');
     try {
-      const res = await Axios.delete(`${BASE_API}/deletephoto/${user_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const res = await Axios.delete(
+        `${BASE_API}/deletephoto/${globalState.user_id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${globalState.token}`,
+          },
         },
-      });
+      );
       dispatch({type: 'SET_IMAGE_URI', inputValue: ''});
     } catch (error) {
       console.error('Error deleting image: ', error);

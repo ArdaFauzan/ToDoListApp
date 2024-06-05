@@ -76,14 +76,12 @@ const Dashboard = ({navigation}) => {
 
   const initializeDashboard = async () => {
     try {
-      const user_id = await getDataAsync('user_id');
-      const token = await getDataAsync('token');
       const getName = await getDataAsync('name');
 
       await Promise.all([
         updateState('userName', getName),
-        getData(user_id, token),
-        getUserPhoto(user_id, token),
+        getData(globalState.user_id, globalState.token),
+        getUserPhoto(globalState.user_id, globalState.token),
         setGreetingMessage(),
       ]);
     } catch (error) {
@@ -127,21 +125,18 @@ const Dashboard = ({navigation}) => {
     updateState('showAddToDo', !state.showAddToDo);
 
   const deleteCheckedHandler = async () => {
-    const user_id = await getDataAsync('user_id');
-    const token = await getDataAsync('token');
-
     if (globalState.checkedIds.length > 0) {
       try {
         await Promise.all(
           globalState.checkedIds.map(id =>
             Axios.delete(`${BASE_API}/deletetodo/${id}`, {
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${globalState.token}`,
               },
             }),
           ),
         );
-        await getData(user_id, token);
+        await getData(globalState.user_id, globalState.token);
         updateState('CLEAR_CHECKED_IDS', [], true);
       } catch (error) {
         console.error('Error deleting todos: ', error);

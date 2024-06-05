@@ -6,6 +6,8 @@ const initialDashboardState = {
   checkedIds: [],
   imageUri: '',
   loggedOut: false,
+  user_id: '',
+  token: '',
 };
 
 const DashboardReducer = (state = initialDashboardState, action) => {
@@ -47,6 +49,16 @@ const DashboardReducer = (state = initialDashboardState, action) => {
       return {
         ...state,
         loggedOut: action.inputValue,
+      };
+    case 'SET_USER_ID':
+      return {
+        ...state,
+        user_id: action.inputValue,
+      };
+    case 'SET_TOKEN':
+      return {
+        ...state,
+        token: action.inputValue,
       };
     default:
       return state;

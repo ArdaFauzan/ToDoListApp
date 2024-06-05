@@ -89,6 +89,8 @@ const SignInPage = ({navigation}) => {
         storeData('name', res.data.name);
         storeData('token', res.data.token);
         storeData('user_id', res.data.user_id);
+        updateState('SET_USER_ID', res.data.user_id, true);
+        updateState('SET_TOKEN', res.data.token, true);
         showCustomToast();
         setTimeout(() => {
           navigation.navigate('Dashboard');

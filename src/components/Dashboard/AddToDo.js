@@ -4,19 +4,17 @@ import Axios from 'axios';
 import Check from '../../assets/check.svg';
 import Close from '../../assets/close.svg';
 import {BASE_API} from '../Utils/API';
-import {getDataAsync} from '../Utils/AsyncStorage';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
+import {useSelector} from 'react-redux';
 
 const AddToDo = ({onGet, onClose}) => {
   const {theme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
+  const globalState = useSelector(state => state.DashboardReducer);
   const [newToDo, setNewToDo] = useState('');
 
   const postData = async () => {
-    const user_id = await getDataAsync('user_id');
-    const token = await getDataAsync('token');
-
     const completed = 0;
     const data = {
       todo: newToDo,
@@ -25,13 +23,17 @@ const AddToDo = ({onGet, onClose}) => {
 
     if (newToDo) {
       try {
-        await Axios.post(`${BASE_API}/createtodo/${user_id}`, data, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+        await Axios.post(
+          `${BASE_API}/createtodo/${globalState.user_id}`,
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${globalState.token}`,
+            },
           },
-        });
+        );
         setNewToDo('');
-        onGet(user_id, token);
+        onGet(globalState.user_id, globalState.token);
       } catch (error) {
         console.error('Error posting data: ', error);
       }

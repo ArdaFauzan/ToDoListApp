@@ -16,7 +16,6 @@ import Close from '../../assets/close.svg';
 import CheckBox from '@react-native-community/checkbox';
 import {BASE_API} from '../Utils/API';
 import {useDispatch, useSelector} from 'react-redux';
-import {getDataAsync} from '../Utils/AsyncStorage';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
 
@@ -50,9 +49,6 @@ const ToDo = ({list, onGet}) => {
   };
 
   const updateToDo = async (todo_id, completed) => {
-    const user_id = await getDataAsync('user_id');
-    const token = await getDataAsync('token');
-
     const data = {
       todo: state.editText,
       completed: completed,
@@ -60,10 +56,10 @@ const ToDo = ({list, onGet}) => {
     try {
       await Axios.put(`${BASE_API}/updatetodo/${todo_id}`, data, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${globalState.token}`,
         },
       });
-      onGet(user_id, token);
+      onGet(globalState.user_id, globalState.token);
     } catch (error) {
       console.error('Error updating data: ', error);
     }

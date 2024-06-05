@@ -7,20 +7,30 @@ import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
 import LoginToast from '../Toast/LoginToast';
 import Toast from 'react-native-root-toast';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Loading = ({navigation}) => {
   const {theme, updateTheme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
+  const dispatch = useDispatch();
+
+  const updateState = (key, value, isGlobal = false) => {
+    if (isGlobal) {
+      dispatch({type: key, inputValue: value});
+    }
+  };
 
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         const userToken = await getDataAsync('token');
+        const user_id = await getDataAsync('user_id');
         const timer = setTimeout(() => {
           if (userToken !== null) {
+            updateState('SET_USER_ID', user_id, true);
+            updateState('SET_TOKEN', userToken, true);
             showCustomToast();
             navigation.navigate('Dashboard');
           } else {
@@ -84,6 +94,13 @@ const Loading = ({navigation}) => {
       if (globalState.loggedOut) {
         await AsyncStorage.clear();
       }
+    };
+
+    const getDataLocal = async () => {
+     
+      const token = await getDataAsync('token');
+
+      
     };
 
     handleLogOut();
