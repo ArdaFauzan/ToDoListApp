@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   },
   background: {
     height: deviceHeight / 4,
-    width: deviceWidth * 0.56,
+    width: deviceWidth * 0.65,
   },
   contentWrapping: {
     justifyContent: 'center',
