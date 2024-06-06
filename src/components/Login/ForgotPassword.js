@@ -37,22 +37,23 @@ const ForgotPassword = ({navigation}) => {
       email: state.email,
     };
 
-    await Axios.post(`${BASE_API}/checknameandemail`, data)
-      .then(() => {
-        Alert.alert('Warning!', 'Account is registered', [
-          {
-            text: 'OK',
-            onPress: () =>
-              navigation.navigate('CreateNewPassword', {
-                data,
-              }),
-          },
-        ]);
-      })
-      .catch(() => {
-        Alert.alert('Warning!', 'Name or Email is not registered!');
-      });
+    if (!state.name || !state.email) {
+      Alert.alert('Warning!', 'Please fill in all fields');
+    }
+
+    try {
+      await Axios.post(`${BASE_API}/checknameandemail`, data);
+      Alert.alert('Success!', 'Account is registered', [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('CreateNewPassword', {data}),
+        },
+      ]);
+    } catch (error) {
+      Alert.alert('Warning!', 'Name or Email is not registered!');
+    }
   };
+
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView behavior="position">

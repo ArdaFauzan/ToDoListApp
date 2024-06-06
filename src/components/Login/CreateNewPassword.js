@@ -22,7 +22,6 @@ import {BASE_API} from '../Utils/API';
 import Toast from 'react-native-root-toast';
 import LoginToast from '../Toast/LoginToast';
 import AlertText from '../Texts/AlertText';
-import {err} from 'react-native-svg';
 
 const CreateNewPassword = ({navigation, route}) => {
   const [state, setState] = useState({
