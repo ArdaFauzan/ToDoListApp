@@ -109,7 +109,7 @@ const CreateNewPassword = ({navigation, route}) => {
     } else {
       try {
         await Axios.put(
-          `${BASE_API}/createnewpassword/${data.name}/${data.email}`,
+          `${BASE_API}/createnewpassword/${data.email}`,
           newPassword,
         );
         Alert.alert(
