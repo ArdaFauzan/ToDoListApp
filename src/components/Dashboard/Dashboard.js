@@ -358,12 +358,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'rgba(255, 255, 255, 0.85)',
     fontWeight: 'bold',
+    marginBottom: hp('1%'),
   },
   greetingText: {
     fontSize: 20,
     fontWeight: 'bold',
     marginTop: hp('2%'),
-    marginLeft: wp('4%'),
+    marginLeft: wp('3%'),
     textAlign: 'center',
   },
   toDoWrapping: {
