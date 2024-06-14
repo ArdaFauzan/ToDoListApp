@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     height: 220,
   },
   drawer: {
-    marginTop: hp('4%'),
+    marginTop: hp('3.5%'),
     marginLeft: wp('10%'),
   },
   userWrapping: {
@@ -358,7 +358,6 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: 'rgba(255, 255, 255, 0.85)',
     fontWeight: 'bold',
-    marginBottom: hp('1%'),
   },
   greetingText: {
     fontSize: 20,
