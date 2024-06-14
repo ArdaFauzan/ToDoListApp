@@ -112,12 +112,16 @@ const CreateNewPassword = ({navigation, route}) => {
           `${BASE_API}/createnewpassword/${data.name}/${data.email}`,
           newPassword,
         );
-        Alert.alert('Success!', 'Password Changed, please Log In again', [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('SignInPage'),
-          },
-        ]);
+        Alert.alert(
+          'Warning!',
+          'Password success changed, please Log In again',
+          [
+            {
+              text: 'OK',
+              onPress: () => navigation.navigate('SignInPage'),
+            },
+          ],
+        );
       } catch (error) {
         Alert.alert('Error', error.response.data.message);
       }

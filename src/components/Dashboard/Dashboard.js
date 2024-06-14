@@ -1,41 +1,41 @@
-import React, {useState, useEffect, useCallback, useContext} from 'react';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {
-  View,
-  Text,
-  StatusBar,
-  ImageBackground,
-  Image,
-  TouchableOpacity,
-  FlatList,
-  KeyboardAvoidingView,
-  StyleSheet,
-  Modal,
-  BackHandler,
   Alert,
+  BackHandler,
+  FlatList,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Modal,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import AddPhoto from './AddPhoto';
+import ToDo from './ToDo';
+import Axios from 'axios';
+import {BASE_API} from '../Utils/API';
+import {useDispatch, useSelector} from 'react-redux';
+import {colors} from '../config/theme';
+import {ThemeContext} from '../Context/ThemeContext';
+import {getDataAsync} from '../Utils/AsyncStorage';
+import Toast from 'react-native-root-toast';
+import LoginToast from '../Toast/LoginToast';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Clock from '../Utils/Clock';
-import Axios from 'axios';
-import Plus from '../../assets/plus.svg';
+import DrawerMenu from '../../assets/drawer.svg';
+import Camera from '../../assets/camerauser.svg';
 import Trash from '../../assets/trash.svg';
 import DarkTrash from '../../assets/trashdark.svg';
-import Camera from '../../assets/camerauser.svg';
-import DrawerMenu from '../../assets/drawer.svg';
-import ToDo from './ToDo';
+import Plus from '../../assets/plus.svg';
 import AddToDo from './AddToDo';
-import AddPhoto from './AddPhoto';
-import {BASE_API} from '../Utils/API';
-import {useSelector, useDispatch} from 'react-redux';
-import {getDataAsync} from '../Utils/AsyncStorage';
-import {colors} from '../config/theme';
-import {ThemeContext} from '../Context/ThemeContext';
-import Toast from 'react-native-root-toast';
-import LoginToast from '../Toast/LoginToast';
 
-const Dashboard = ({navigation}) => {
+const Dashboard2 = ({navigation}) => {
   const {theme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
@@ -214,18 +214,13 @@ const Dashboard = ({navigation}) => {
   };
 
   return (
-    <View style={[styles.container, {backgroundColor: activeColors.primary}]}>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={state.showModal}
-        onRequestClose={() => updateState('showModal', false)}>
-        <AddPhoto
-          isVisible={state.showModal}
-          onClose={() => updateState('showModal', false)}
-        />
-      </Modal>
-
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: activeColors.primary,
+        },
+      ]}>
       <StatusBar
         translucent
         barStyle={theme.mode === 'light' ? 'dark-content' : activeColors.text}
@@ -233,6 +228,17 @@ const Dashboard = ({navigation}) => {
       />
 
       <KeyboardAvoidingView behavior="position">
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={state.showModal}
+          onRequestClose={() => updateState('showModal', false)}>
+          <AddPhoto
+            isVisible={state.showModal}
+            onClose={() => updateState('showModal', false)}
+          />
+        </Modal>
+
         <ImageBackground
           source={
             theme.mode === 'dark'
@@ -246,8 +252,8 @@ const Dashboard = ({navigation}) => {
             <DrawerMenu height={43} width={39} />
           </TouchableOpacity>
 
-          <View style={styles.welcomeWrapping}>
-            <View>
+          <View style={styles.userWrapping}>
+            <View style={styles.userImageWrapping}>
               <Image
                 source={
                   globalState.imageUri
@@ -260,66 +266,59 @@ const Dashboard = ({navigation}) => {
               <TouchableOpacity
                 onPress={handleCameraClick}
                 style={styles.camera}>
-                <Camera height={35} width={35} />
+                <Camera height={32} width={32} />
               </TouchableOpacity>
             </View>
+
             <Text style={styles.welcomeText}>Welcome {state.userName}!</Text>
           </View>
         </ImageBackground>
 
-        <View>
-          <Text style={[styles.greetingText, {color: activeColors.text}]}>
-            {state.greeting}
-          </Text>
-          <Clock />
-          <Text style={[styles.taskListText, {color: activeColors.text}]}>
-            Tasks List
-          </Text>
+        <Clock />
+        <Text style={[styles.greetingText, {color: activeColors.text}]}>
+          {state.greeting}
+        </Text>
 
-          <View style={styles.toDoContainer}>
-            <View
-              style={[
-                styles.toDoWrapping,
-                {backgroundColor: activeColors.secondary},
-              ]}>
-              <View style={styles.dailyTaskWrapping}>
-                <Text
-                  style={[styles.dailyTaskText, {color: activeColors.text}]}>
-                  {globalState.isDeleteMode ? 'Choose Item' : 'Daily Tasks'}
-                </Text>
+        <View
+          style={[
+            styles.toDoWrapping,
+            {backgroundColor: activeColors.secondary},
+          ]}>
+          <View style={styles.toDoHeader}>
+            <Text style={[styles.toDoText, {color: activeColors.text}]}>
+              {globalState.isDeleteMode ? 'Choose Item' : 'Tasks List'}
+            </Text>
 
-                <TouchableOpacity
-                  style={styles.plusWrapping}
-                  onPress={
-                    globalState.isDeleteMode
-                      ? deleteCheckedHandler
-                      : toggleShowAddToDo
-                  }>
-                  {globalState.isDeleteMode ? (
-                    theme.mode === 'light' ? (
-                      <Trash width={28} height={28} />
-                    ) : (
-                      <DarkTrash width={28} height={28} />
-                    )
-                  ) : (
-                    <Plus width={29} height={28} />
-                  )}
-                </TouchableOpacity>
-              </View>
-
-              <FlatList
-                data={globalState.todos}
-                renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
-                style={styles.toDo}
-                ListHeaderComponent={
-                  state.showAddToDo ? (
-                    <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
-                  ) : null
-                }
-              />
-            </View>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={
+                globalState.isDeleteMode
+                  ? deleteCheckedHandler
+                  : toggleShowAddToDo
+              }>
+              {globalState.isDeleteMode ? (
+                theme.mode === 'light' ? (
+                  <Trash width={28} height={28} />
+                ) : (
+                  <DarkTrash width={28} height={28} />
+                )
+              ) : (
+                <Plus width={29} height={28} />
+              )}
+            </TouchableOpacity>
           </View>
+
+          <FlatList
+            data={globalState.todos}
+            renderItem={renderItem}
+            keyExtractor={item => item.id.toString()}
+            style={styles.toDo}
+            ListHeaderComponent={
+              state.showAddToDo ? (
+                <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
+              ) : null
+            }
+          />
         </View>
       </KeyboardAvoidingView>
     </View>
@@ -332,66 +331,59 @@ const styles = StyleSheet.create({
   },
   background: {
     width: '100%',
-    height: 230,
+    height: 220,
   },
   drawer: {
     marginTop: hp('4%'),
-    marginLeft: wp('7%'),
+    marginLeft: wp('10%'),
   },
-  welcomeWrapping: {
-    justifyContent: 'center',
+  userWrapping: {
     alignItems: 'center',
   },
+  userImageWrapping: {
+    position: 'relative',
+  },
   userImage: {
-    height: 110,
-    width: 110,
-    borderRadius: 55,
+    height: 120,
+    width: 120,
+    borderRadius: 60,
   },
   camera: {
     position: 'absolute',
-    right: 30,
-    top: 70,
-    left: 80,
+    left: 90,
+    bottom: 10,
+    right: 0,
   },
   welcomeText: {
     fontSize: 20,
     color: 'rgba(255, 255, 255, 0.85)',
     fontWeight: 'bold',
-    marginTop: hp('1%'),
   },
   greetingText: {
     fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'right',
-    marginRight: wp('5%'),
     marginTop: hp('2%'),
-  },
-  taskListText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: hp('3%'),
-    marginLeft: wp('7%'),
-  },
-  toDoContainer: {
-    alignItems: 'center',
+    marginLeft: wp('4%'),
+    textAlign: 'center',
   },
   toDoWrapping: {
-    width: 306,
+    alignSelf: 'center',
+    width: '90%',
     height: 320,
     borderRadius: 8,
     marginTop: hp('1%'),
   },
-  dailyTaskWrapping: {
+  toDoHeader: {
     justifyContent: 'space-between',
     flexDirection: 'row',
   },
-  dailyTaskText: {
-    fontSize: 17,
+  toDoText: {
+    fontSize: 18,
     fontWeight: '700',
     marginLeft: wp('5%'),
     marginTop: hp('1%'),
   },
-  plusWrapping: {
+  actionButton: {
     marginRight: wp('5%'),
     marginTop: hp('1%'),
     alignSelf: 'center',
@@ -399,8 +391,8 @@ const styles = StyleSheet.create({
   toDo: {
     marginLeft: wp('10%'),
     marginBottom: hp('1%'),
-    marginTop: hp('0.7%'),
+    marginTop: hp('1%'),
   },
 });
 
-export default Dashboard;
+export default Dashboard2;

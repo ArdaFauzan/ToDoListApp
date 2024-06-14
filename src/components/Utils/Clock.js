@@ -16,7 +16,7 @@ const Clock = () => {
         colorHour="#3DA8AE"
         colorMinutes="#3DA8AE"
         colorSeconds="#A8BEBF"
-        size={148}
+        size={160}
         autostart={true}
         showSeconds
       />

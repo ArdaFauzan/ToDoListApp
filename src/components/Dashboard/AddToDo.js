@@ -55,10 +55,11 @@ const AddToDo = ({onGet, onClose}) => {
         onChangeText={text => setNewToDo(text)}
         value={newToDo}
         multiline
+        onSubmitEditing={postData}
       />
 
       <View style={styles.wrappingHandlerAdd}>
-        <TouchableOpacity onPress={() => postData()}>
+        <TouchableOpacity onPress={postData}>
           <Check height={20} width={20} />
         </TouchableOpacity>
 

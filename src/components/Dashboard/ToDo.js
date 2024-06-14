@@ -203,8 +203,7 @@ const styles = StyleSheet.create({
   },
   checkBoxWrapping: {
     position: 'absolute',
-    right: 10,
-    left: 210,
+    left: 250,
     justifyContent: 'center',
   },
   checkBox: {
