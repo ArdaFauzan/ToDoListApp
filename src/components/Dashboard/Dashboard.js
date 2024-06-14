@@ -370,9 +370,9 @@ const styles = StyleSheet.create({
   toDoWrapping: {
     alignSelf: 'center',
     width: '90%',
-    height: 320,
+    height: 335,
     borderRadius: 8,
-    marginTop: hp('1%'),
+    marginTop: hp('0.5%'),
   },
   toDoHeader: {
     justifyContent: 'space-between',
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
   toDo: {
     marginLeft: wp('10%'),
     marginBottom: hp('1%'),
-    marginTop: hp('1%'),
+    marginTop: hp('0.5%'),
   },
 });
 
