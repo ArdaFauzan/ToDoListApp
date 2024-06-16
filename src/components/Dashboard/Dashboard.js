@@ -334,8 +334,8 @@ const styles = StyleSheet.create({
     height: 220,
   },
   drawer: {
-    marginTop: hp('3.5%'),
-    marginLeft: wp('10%'),
+    marginTop: hp('3%'),
+    marginLeft: wp('8%'),
   },
   userWrapping: {
     alignItems: 'center',
@@ -362,16 +362,16 @@ const styles = StyleSheet.create({
   greetingText: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: hp('2%'),
+    marginTop: hp('1%'),
     marginLeft: wp('3%'),
     textAlign: 'center',
   },
   toDoWrapping: {
     alignSelf: 'center',
     width: '90%',
-    height: 335,
+    height: 337,
     borderRadius: 8,
-    marginTop: hp('0.5%'),
+    marginTop: hp('0.9%'),
   },
   toDoHeader: {
     justifyContent: 'space-between',
