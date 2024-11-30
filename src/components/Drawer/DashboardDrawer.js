@@ -110,7 +110,7 @@ const DashboardDrawer = ({navigation}) => {
             {backgroundColor: activeColors.logOutbutton},
           ]}>
           <Text style={[styles.logOutText, {color: activeColors.logOutText}]}>
-            Log Out
+            Logout
           </Text>
         </TouchableOpacity>
       </View>
