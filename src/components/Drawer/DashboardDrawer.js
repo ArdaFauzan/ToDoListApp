@@ -51,10 +51,16 @@ const DashboardDrawer = ({navigation}) => {
           {
             text: 'Yes, Logout',
             onPress: async () => {
-              await AsyncStorage.clear(); // Hapus semua data di AsyncStorage
-              updateState('SET_IMAGE_URI', null, true);
+              await AsyncStorage.removeItem('name');
+              await AsyncStorage.removeItem('token');
+              await AsyncStorage.removeItem('user_id'); // Hapus semua data di AsyncStorage
+              updateState('SET_DELETEMODE', false, true);
               updateState('SET_TODOS', [], true);
+              updateState('CLEAR_CHECKED_IDS', [], true);
+              updateState('SET_IMAGE_URI', '', true);
               updateState('SET_LOGGED_OUT', true, true);
+              updateState('SET_USER_ID', '', true);
+              updateState('SET_TOKEN', '', true);
               navigation.navigate('SlashPage');
             },
           },

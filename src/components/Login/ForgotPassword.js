@@ -91,6 +91,8 @@ const ForgotPassword = ({navigation}) => {
             onChangeText={value => updateState('email', value)}
             placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
             style={styles.emailTextInput}
+            autoCapitalize="none"
+            inputMode="email"
           />
 
           <TouchableOpacity onPress={checkUser} style={styles.buttonWrapping}>

@@ -182,6 +182,7 @@ const CreateNewPassword = ({navigation, route}) => {
               placeholderTextColor="rgba(0, 0, 0, 0.75)"
               secureTextEntry={!state.showPassword}
               style={styles.passwordTextInput}
+              autoCapitalize="none"
             />
             <TouchableOpacity
               style={styles.showPasswordTouch}
@@ -211,6 +212,7 @@ const CreateNewPassword = ({navigation, route}) => {
             placeholderTextColor={'rgba(0, 0, 0, 0.75)'}
             style={styles.confirmPasswordTextInput}
             secureTextEntry={true}
+            autoCapitalize="none"
           />
 
           {state.showConfirmPasswordAlert ? (

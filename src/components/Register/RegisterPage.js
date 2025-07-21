@@ -136,6 +136,8 @@ const RegisterPage = ({navigation}) => {
             placeholder="Enter your Email"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
             style={styles.textInput}
+            autoCapitalize="none"
+            inputMode="email"
           />
 
           {state.showEmailAlert ? (
@@ -150,6 +152,7 @@ const RegisterPage = ({navigation}) => {
               placeholderTextColor="rgba(0, 0, 0, 0.75)"
               secureTextEntry={!state.showPassword}
               style={styles.passwordTextInput}
+              autoCapitalize="none"
             />
 
             <TouchableOpacity
@@ -177,6 +180,7 @@ const RegisterPage = ({navigation}) => {
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
             secureTextEntry={true}
             style={[styles.textInput, {marginTop: hp('2%')}]}
+            autoCapitalize="none"
           />
 
           {state.showConfirmPasswordAlert ? (

@@ -1,5 +1,11 @@
 import React, {useContext, useState} from 'react';
-import {View, TouchableOpacity, TextInput, StyleSheet} from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  Alert,
+} from 'react-native';
 import Axios from 'axios';
 import Check from '../../assets/check.svg';
 import Close from '../../assets/close.svg';
@@ -11,52 +17,73 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import TimeInput from '../time/TimeInput';
+import DateInput from '../date/DateInput';
 
 const AddToDo = ({onGet, onClose}) => {
   const {theme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
   const [newToDo, setNewToDo] = useState('');
+  const [date, setDate] = useState(null);
+  const [time, setTime] = useState(null);
 
   const postData = async () => {
+    if (!newToDo || !date || !time) {
+      Alert.alert('Warning!', 'Fill out all fields!');
+    }
+
     const completed = 0;
     const data = {
       todo: newToDo,
       completed,
+      date: date
+        ? `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+        : null,
+      time: time
+        ? `${String(time.getHours()).padStart(2, '0')}:${String(
+            time.getMinutes(),
+          ).padStart(2, '0')}`
+        : null,
     };
 
-    if (newToDo) {
-      try {
-        await Axios.post(
-          `${BASE_API}/createtodo/${globalState.user_id}`,
-          data,
-          {
-            headers: {
-              Authorization: `Bearer ${globalState.token}`,
-            },
-          },
-        );
-        setNewToDo('');
-        onGet(globalState.user_id, globalState.token);
-      } catch (error) {
-        console.error('Error posting data: ', error);
-      }
-    } else {
-      console.warn('Input your task!');
+    try {
+      await Axios.post(`${BASE_API}/createtodo/${globalState.user_id}`, data, {
+        headers: {
+          Authorization: `Bearer ${globalState.token}`,
+        },
+      });
+      setNewToDo('');
+      onGet(globalState.user_id, globalState.token);
+    } catch (error) {
+      console.error('Error posting data: ', error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={[styles.toDoTextInput, {color: activeColors.text}]}
-        placeholder="Add new todo"
-        placeholderTextColor={activeColors.text}
-        onChangeText={text => setNewToDo(text)}
-        value={newToDo}
-        multiline
-        onSubmitEditing={postData}
-      />
+      <View>
+        <TextInput
+          style={[styles.toDoTextInput, {color: activeColors.text}]}
+          placeholder="Add new todo"
+          placeholderTextColor={activeColors.text}
+          onChangeText={text => setNewToDo(text)}
+          value={newToDo}
+          multiline
+          onSubmitEditing={postData}
+        />
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingLeft: wp('7.5%'),
+            gap: wp('5%'),
+          }}>
+          <DateInput date={date} setDate={setDate} />
+          <TimeInput time={time} setTime={setTime} />
+        </View>
+      </View>
 
       <View style={styles.wrappingHandlerAdd}>
         <TouchableOpacity onPress={postData}>
@@ -75,16 +102,15 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: hp('1%'),
   },
   toDoTextInput: {
-    height: 40,
+    height: 'auto',
     borderColor: 'gray',
     borderBottomWidth: 1,
-    paddingRight: 2,
-    paddingLeft: 6,
-    marginLeft: wp('8%'),
-    marginTop: hp('-1%'),
-    width: '50%',
+    paddingLeft: 4,
+    marginLeft: wp('7%'),
+    width: 160,
   },
   wrappingHandlerAdd: {
     position: 'absolute',

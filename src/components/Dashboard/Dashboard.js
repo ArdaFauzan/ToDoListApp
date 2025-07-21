@@ -34,8 +34,9 @@ import Trash from '../../assets/trash.svg';
 import DarkTrash from '../../assets/trashdark.svg';
 import Plus from '../../assets/plus.svg';
 import AddToDo from './AddToDo';
+import {useFocusEffect} from '@react-navigation/native';
 
-const Dashboard2 = ({navigation}) => {
+const Dashboard = ({navigation}) => {
   const {theme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
@@ -81,7 +82,6 @@ const Dashboard2 = ({navigation}) => {
   }, [state.backPressedOnce, globalState.isDeleteMode]);
 
   useEffect(() => {
-    initializeDashboard();
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
     return () => {
@@ -89,10 +89,19 @@ const Dashboard2 = ({navigation}) => {
     };
   }, [onBackPress]);
 
-  const initializeDashboard = async () => {
+  useFocusEffect(
+    useCallback(() => {
+      initializeDashboard();
+
+      return () => {
+        console.log('Dashboard bluring...');
+      };
+    }, [globalState.user_id, globalState.token]),
+  );
+
+  const initializeDashboard = useCallback(async () => {
     try {
       const getName = await getDataAsync('name');
-
       await Promise.all([
         updateState('userName', getName),
         getData(globalState.user_id, globalState.token),
@@ -100,13 +109,13 @@ const Dashboard2 = ({navigation}) => {
         setGreetingMessage(),
       ]);
     } catch (error) {
-      console.error('Initialization error:', error);
+      console.log('Initialization error:', error);
       Alert.alert(
         'Error',
         'An error occurred while initializing the dashboard. Please try again.',
       );
     }
-  };
+  }, [globalState.user_id, globalState.token]);
 
   const showCustomToast = () => {
     const toast = Toast.show(
@@ -162,9 +171,10 @@ const Dashboard2 = ({navigation}) => {
           Authorization: `Bearer ${token}`,
         },
       });
+
       updateState('SET_TODOS', res.data.data, true);
     } catch (error) {
-      console.error('Error fetching data: ', error);
+      console.log('Error fetching data: ', error);
     }
   };
 
@@ -186,7 +196,7 @@ const Dashboard2 = ({navigation}) => {
         await getData(globalState.user_id, globalState.token);
         updateState('CLEAR_CHECKED_IDS', [], true);
       } catch (error) {
-        console.error('Error deleting todos: ', error);
+        console.log('Error deleting todos: ', error);
       }
     }
   };
@@ -395,4 +405,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Dashboard2;
+export default Dashboard;

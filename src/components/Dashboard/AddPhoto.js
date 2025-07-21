@@ -131,7 +131,7 @@ const AddPhoto = ({onClose}) => {
       );
       console.log('Upload success:', response.data);
     } catch (error) {
-      console.error('Error uploading photo:', error.message);
+      console.log('Error uploading photo:', error.message);
     }
   };
 

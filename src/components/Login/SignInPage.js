@@ -20,6 +20,7 @@ import {useDispatch} from 'react-redux';
 import LoginToast from '../Toast/LoginToast';
 import Toast from 'react-native-root-toast';
 import {deviceHeight, deviceWidth} from '../Utils/Dimension';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SignInPage = ({navigation}) => {
   const dispatch = useDispatch();
@@ -75,28 +76,28 @@ const SignInPage = ({navigation}) => {
   };
 
   const loginHandler = async () => {
+    if (!state.signIn || !state.password) {
+      Alert.alert('Warning!', 'Please fill out all fields!');
+    }
+
     const data = {
       email: state.signIn,
       password: state.password,
     };
 
-    if (!state.signIn || !state.password) {
-      Alert.alert('Warning!', 'Please fill in all fields');
-    } else {
-      try {
-        const res = await Axios.post(`${BASE_API}/login`, data);
-        storeData('name', res.data.name);
-        storeData('token', res.data.token);
-        storeData('user_id', res.data.user_id);
-        updateState('SET_USER_ID', res.data.user_id, true);
-        updateState('SET_TOKEN', res.data.token, true);
-        showCustomToast();
-        setTimeout(() => {
-          navigation.navigate('Dashboard');
-        }, 1000);
-      } catch (error) {
-        Alert.alert('Warning!', error.response.data.message);
-      }
+    try {
+      const res = await Axios.post(`${BASE_API}/login`, data);
+      storeData('name', res.data.name);
+      storeData('token', res.data.token);
+      storeData('user_id', res.data.user_id);
+      updateState('SET_USER_ID', res.data.user_id, true);
+      updateState('SET_TOKEN', res.data.token, true);
+      showCustomToast();
+      setTimeout(() => {
+        navigation.navigate('Dashboard');
+      }, 1000);
+    } catch (error) {
+      Alert.alert('Warning!', error.response.data.message);
     }
   };
 
@@ -127,6 +128,8 @@ const SignInPage = ({navigation}) => {
             placeholder="Enter your Email"
             placeholderTextColor="rgba(0, 0, 0, 0.75)"
             style={styles.emailTextInput}
+            autoCapitalize="none"
+            inputMode="email"
           />
 
           <View style={styles.passwordWrapping}>
@@ -137,6 +140,7 @@ const SignInPage = ({navigation}) => {
               placeholderTextColor="rgba(0, 0, 0, 0.75)"
               secureTextEntry={!state.showPassword}
               style={styles.passwordTextInput}
+              autoCapitalize="none"
             />
             <TouchableOpacity
               style={styles.showPasswordTouch}
