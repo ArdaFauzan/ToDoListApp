@@ -68,7 +68,7 @@ const DashboardDrawer = ({navigation}) => {
         {cancelable: false},
       );
     } catch (error) {
-      console.error('Error logging out: ', error);
+      console.log('Error logging out: ', error);
       Alert.alert(
         'Error',
         'An error occurred while logging out. Please try again.',

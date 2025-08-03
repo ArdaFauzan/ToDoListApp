@@ -38,7 +38,11 @@ const TimeInput = ({time, setTime}) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.inputButton} onPress={showTimePicker}>
-        {isDarkMode ? <ClockDark /> : <Clock />}
+        {isDarkMode ? (
+          <ClockDark height={20} width={20} />
+        ) : (
+          <Clock height={20} width={20} />
+        )}
         <Text style={[styles.text, {color: activeColors.text}]}>
           {formatTimeForDisplay(time)}
         </Text>
@@ -65,13 +69,12 @@ const styles = StyleSheet.create({
     gap: hp(10),
   },
   inputButton: {
-    marginTop: hp('1%'),
     flexDirection: 'row',
     gap: wp('1%'),
     alignItems: 'center',
   },
   text: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '400',
   },
 });

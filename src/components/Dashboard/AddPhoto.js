@@ -7,6 +7,7 @@ import {
   PermissionsAndroid,
   Platform,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {heightPercentageToDP as hp} from 'react-native-responsive-screen';
@@ -16,12 +17,11 @@ import Gallery from '../../assets/gallery.svg';
 import DarkGallery from '../../assets/gallerydark.svg';
 import Trash from '../../assets/trashphoto.svg';
 import DarkTrash from '../../assets/trashphotodark.svg';
-import Axios from 'axios';
 import {useDispatch, useSelector} from 'react-redux';
 import {Image as ImageCompressor} from 'react-native-compressor';
-import {BASE_API} from '@env';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AddPhoto = ({onClose}) => {
   const {theme} = useContext(ThemeContext);
@@ -30,13 +30,18 @@ const AddPhoto = ({onClose}) => {
   const globalState = useSelector(state => state.DashboardReducer);
 
   const options = {
-    saveToPhotos: true,
+    saveToPhotos: false, // Tidak perlu save ke photos
     mediaType: 'photo',
     includeBase64: false,
+    quality: 0.8,
+    maxWidth: 800, // Batasi ukuran untuk menghemat storage
+    maxHeight: 800,
   };
 
   const getImage = async camera => {
     const requestCameraPermission = async () => {
+      if (Platform.OS === 'ios') return true;
+
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
@@ -51,6 +56,8 @@ const AddPhoto = ({onClose}) => {
     };
 
     const requestGalleryPermission = async () => {
+      if (Platform.OS === 'ios') return true;
+
       const granted = await PermissionsAndroid.request(
         Platform.Version < 33
           ? PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
@@ -66,88 +73,126 @@ const AddPhoto = ({onClose}) => {
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     };
 
-    if (camera && (await requestCameraPermission())) {
-      launchCamera(options, handleImageResponse);
-    } else if (!camera && (await requestGalleryPermission())) {
-      launchImageLibrary(options, handleImageResponse);
+    try {
+      if (camera && (await requestCameraPermission())) {
+        launchCamera(options, handleImageResponse);
+      } else if (!camera && (await requestGalleryPermission())) {
+        launchImageLibrary(options, handleImageResponse);
+      } else {
+        Alert.alert(
+          'Permission Denied',
+          'Camera/Gallery permission is required',
+        );
+      }
+    } catch (error) {
+      console.log('Error requesting permission:', error);
+      Alert.alert('Error', 'Failed to request permission');
     }
   };
 
   const handleImageResponse = res => {
     if (res.didCancel) {
       console.log('User cancelled image operation');
-    } else if (res.error) {
+      return;
+    }
+
+    if (res.error) {
       console.log('Image operation error: ', res.error);
-    } else if (res.assets && res.assets.length > 0) {
-      const source = {uri: res.assets[0].uri};
-      dispatch({type: 'SET_IMAGE_URI', inputValue: source.uri});
-      postPhotoUser(source.uri);
+      Alert.alert('Error', `Image picker error: ${res.error}`);
+      return;
+    }
+
+    if (res.assets && res.assets.length > 0) {
+      const asset = res.assets[0];
+
+      if (asset.uri) {
+        processAndSaveImage(asset.uri);
+      } else {
+        Alert.alert('Error', 'No image URI found');
+      }
     } else {
       console.log('No image assets found');
+      Alert.alert('Error', 'No image selected');
     }
   };
 
-  const postPhotoUser = async uri => {
-    const formData = new FormData();
-    const fileExtension = uri.split('.').pop();
-    let mimeType = 'image/jpeg';
-
-    switch (fileExtension) {
-      case 'png':
-        mimeType = 'image/png';
-        break;
-      case 'jpg':
-      case 'jpeg':
-        mimeType = 'image/jpeg';
-        break;
-      case 'gif':
-        mimeType = 'image/gif';
-        break;
-      default:
-        mimeType = 'image/jpeg';
-    }
-
-    const compressedImage = await ImageCompressor.compress(uri, {
-      compressionMethod: 'auto',
-    });
-
-    formData.append('image', {
-      uri: compressedImage,
-      type: mimeType,
-      name: `image.${fileExtension}`,
-    });
-
+  const processAndSaveImage = async uri => {
     try {
-      const response = await Axios.post(
-        `${BASE_API}/uploadphoto/${globalState.user_id}`,
-        formData,
-        {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${globalState.token}`,
-          },
-        },
-      );
-      console.log('Upload success:', response.data);
+      // Compress image untuk menghemat storage space
+      let processedImageUri;
+      try {
+        processedImageUri = await ImageCompressor.compress(uri, {
+          compressionMethod: 'auto',
+          quality: 0.7, // Compress lebih agresif untuk local storage
+          maxWidth: 600,
+          maxHeight: 600,
+        });
+      } catch (compressionError) {
+        console.log(
+          'Image compression failed, using original:',
+          compressionError,
+        );
+        processedImageUri = uri; // Fallback ke URI original
+      }
+
+      // Simpan URI ke AsyncStorage
+      await saveImageUriToStorage(processedImageUri);
+
+      // Update Redux state
+      dispatch({type: 'SET_IMAGE_URI', inputValue: processedImageUri});
+
+      // Close modal setelah berhasil
+      setTimeout(() => {
+        onClose();
+      }, 1000);
     } catch (error) {
-      console.log('Error uploading photo:', error.message);
+      console.log('Error processing image:', error);
+      Alert.alert('Error', 'Failed to save photo. Please try again.');
     }
   };
 
-  const deletePhotoUser = async () => {
+  const saveImageUriToStorage = async uri => {
     try {
-      const res = await Axios.delete(
-        `${BASE_API}/deletephoto/${globalState.user_id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${globalState.token}`,
-          },
-        },
-      );
+      // Generate unique key untuk setiap user (jika ada user_id)
+      const storageKey = globalState.user_id
+        ? `userPhoto_${globalState.user_id}`
+        : 'userPhotoUri';
+
+      await AsyncStorage.setItem(storageKey, uri);
+
+      // Juga simpan ke key umum untuk backward compatibility
+      await AsyncStorage.setItem('userPhotoUrl', uri);
+    } catch (error) {
+      console.log('Error saving photo URI to AsyncStorage:', error);
+      throw error;
+    }
+  };
+
+  const removeImageUriFromStorage = async () => {
+    try {
+      // Remove dari kedua key
+      const storageKey = globalState.user_id
+        ? `userPhoto_${globalState.user_id}`
+        : 'userPhotoUri';
+
+      await AsyncStorage.removeItem(storageKey);
+      await AsyncStorage.removeItem('userPhotoUrl');
+    } catch (error) {
+      console.log('Error removing photo URI from AsyncStorage:', error);
+      throw error;
+    }
+  };
+
+  const deletePhoto = async () => {
+    try {
+      // Remove URI dari AsyncStorage
+      await removeImageUriFromStorage();
+
+      // Update Redux state
       dispatch({type: 'SET_IMAGE_URI', inputValue: ''});
     } catch (error) {
-      console.error('Error deleting image: ', error);
+      console.log('Delete error:', error);
+      Alert.alert('Error', 'Failed to delete photo. Please try again.');
     }
   };
 
@@ -164,7 +209,9 @@ const AddPhoto = ({onClose}) => {
           </Text>
 
           <View style={styles.imageWrapping}>
-            <TouchableOpacity onPress={() => getImage(true)}>
+            <TouchableOpacity
+              onPress={() => getImage(true)}
+              style={styles.actionButton}>
               {theme.mode === 'light' ? (
                 <Camera width={60} height={60} />
               ) : (
@@ -172,7 +219,9 @@ const AddPhoto = ({onClose}) => {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => getImage(false)}>
+            <TouchableOpacity
+              onPress={() => getImage(false)}
+              style={styles.actionButton}>
               {theme.mode === 'light' ? (
                 <Gallery width={60} height={60} />
               ) : (
@@ -180,7 +229,7 @@ const AddPhoto = ({onClose}) => {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={deletePhotoUser}>
+            <TouchableOpacity onPress={deletePhoto} style={styles.actionButton}>
               {theme.mode === 'light' ? (
                 <Trash width={60} height={60} />
               ) : (
@@ -220,11 +269,15 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
+    marginBottom: 10,
   },
   imageWrapping: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginTop: hp('1%'),
+  },
+  actionButton: {
+    alignItems: 'center',
   },
 });
 

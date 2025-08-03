@@ -33,14 +33,12 @@ const ToDo = ({list, onGet}) => {
   const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
 
-  // Format date string menjadi Date object
   const parseDateString = dateString => {
     if (!dateString || typeof dateString !== 'string') {
       return new Date();
     }
     const parts = dateString.split('-');
     if (parts.length === 3) {
-      // Perhatikan urutan: YYYY, MM-1, DD
       return new Date(
         parseInt(parts[2]),
         parseInt(parts[1], 10) - 1,
@@ -50,7 +48,6 @@ const ToDo = ({list, onGet}) => {
     return new Date();
   };
 
-  // Format time string menjadi Date object
   const parseTimeString = (timeString, baseDate = new Date()) => {
     if (!timeString || typeof timeString !== 'string') {
       return baseDate;
@@ -106,46 +103,29 @@ const ToDo = ({list, onGet}) => {
     }
   };
 
+  const saveTodosToStorage = async todos => {
+    try {
+      await AsyncStorage.setItem('todos', JSON.stringify(todos));
+    } catch (error) {
+      console.log('Error saving todos to storage: ', error);
+    }
+  };
+
+  const updateToDo = (todo_id, completed) => {
+    const data = {
+      todo: state.editText,
+      completed: completed,
+      date: list.date, // Gunakan date yang sudah ada
+      time: list.time, // Gunakan time yang sudah ada
+    };
+    // Dispatch aksi UPDATE_TODO ke Redux
+    dispatch({type: 'UPDATE_TODO', todoId: todo_id, updatedData: data});
+  };
+
   const completedHandler = () => {
     const newCompleted = !state.completed;
     updateState('completed', newCompleted);
     updateToDo(list.id, newCompleted);
-  };
-
-  const formatDateForApi = dateObj => {
-    if (!(dateObj instanceof Date)) return '';
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const year = dateObj.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
-
-  const formatTimeForApi = dateObj => {
-    if (!(dateObj instanceof Date)) return '';
-    const hours = String(dateObj.getHours()).padStart(2, '0');
-    const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
-
-  const updateToDo = async (todo_id, completed) => {
-    const data = {
-      todo: state.editText,
-      completed: completed,
-      date: formatDateForApi(state.editDate),
-      time: formatTimeForApi(state.editTime),
-    };
-
-    try {
-      await Axios.put(`${BASE_API}/updatetodo/${todo_id}`, data, {
-        headers: {
-          Authorization: `Bearer ${globalState.token}`,
-        },
-      });
-
-      onGet(globalState.user_id, globalState.token);
-    } catch (error) {
-      console.log('Error updating data: ', error);
-    }
   };
 
   const handleEdit = () => {
@@ -153,7 +133,21 @@ const ToDo = ({list, onGet}) => {
   };
 
   const handleSave = async () => {
-    await updateToDo(list.id, state.completed);
+    // Perbarui Redux state dengan data yang diedit
+    const updatedData = {
+      ...list, // Salin data lama
+      todo: state.editText,
+      date: state.editDate,
+      time: state.editTime,
+    };
+    dispatch({type: 'UPDATE_TODO', todoId: list.id, updatedData});
+
+    // Simpan ke Async Storage
+    await saveTodosToStorage(
+      globalState.todos.map(todo => (todo.id === list.id ? updatedData : todo)),
+    );
+
+    updateState('isEditing', false);
   };
 
   const handleLongPress = () => {

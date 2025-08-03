@@ -1,11 +1,15 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   Alert,
   BackHandler,
-  FlatList,
   Image,
   ImageBackground,
-  KeyboardAvoidingView,
   Modal,
   StatusBar,
   StyleSheet,
@@ -20,35 +24,104 @@ import {BASE_API} from '@env';
 import {useDispatch, useSelector} from 'react-redux';
 import {colors} from '../config/theme';
 import {ThemeContext} from '../Context/ThemeContext';
-import {getDataAsync} from '../Utils/AsyncStorage';
 import Toast from 'react-native-root-toast';
 import LoginToast from '../Toast/LoginToast';
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
-import Clock from '../Utils/Clock';
 import DrawerMenu from '../../assets/drawer.svg';
 import Camera from '../../assets/camerauser.svg';
-import Trash from '../../assets/trash.svg';
-import DarkTrash from '../../assets/trashdark.svg';
 import Plus from '../../assets/plus.svg';
 import AddToDo from './AddToDo';
 import {useFocusEffect} from '@react-navigation/native';
+import ToDoCalendar from '../calendar/ToDoCalendar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const SafeImage = ({source, style, defaultSource, onError, ...props}) => {
+  const [hasError, setHasError] = useState(false);
+
+  const handleError = error => {
+    console.log('SafeImage error:', error);
+    setHasError(true);
+    if (onError) {
+      onError(error);
+    }
+  };
+
+  const getValidSource = () => {
+    if (hasError) {
+      return defaultSource;
+    }
+
+    if (!source) {
+      return defaultSource;
+    }
+
+    if (typeof source === 'number') {
+      return source;
+    }
+
+    if (typeof source === 'object' && source.uri) {
+      const uri = source.uri;
+      if (
+        uri &&
+        uri.trim() &&
+        uri !== 'null' &&
+        uri !== 'undefined' &&
+        (uri.startsWith('http') ||
+          uri.startsWith('file://') ||
+          uri.startsWith('content://') || // Android content URI
+          uri.startsWith('ph://') || // iOS Photos URI
+          uri.startsWith('/')) // Absolute path
+      ) {
+        return source;
+      }
+    }
+
+    return defaultSource;
+  };
+
+  const validSource = getValidSource();
+
+  return validSource ? (
+    <Image
+      source={validSource}
+      style={style}
+      onError={handleError}
+      resizeMode="cover"
+      {...props}
+    />
+  ) : (
+    <View
+      style={[
+        style,
+        {
+          backgroundColor: '#f0f0f0',
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+      ]}>
+      <Text style={{color: '#666', fontSize: 24}}>👤</Text>
+    </View>
+  );
+};
 
 const Dashboard = ({navigation}) => {
   const {theme} = useContext(ThemeContext);
   let activeColors = colors[theme.mode];
   const globalState = useSelector(state => state.DashboardReducer);
   const dispatch = useDispatch();
+  const hasLoadedTodos = useRef(false);
 
   const [state, setState] = useState({
-    showAddToDo: false,
     showModal: false,
     userName: '',
     greeting: '',
-    showExitAlert: false,
     backPressedOnce: false,
+    showAddToDoModal: false,
+    isEditMode: false,
+    todoToEdit: null,
   });
 
   const updateState = (key, value, isGlobal = false) => {
@@ -67,7 +140,6 @@ const Dashboard = ({navigation}) => {
       updateState('SET_DELETEMODE', false, true);
       return true;
     }
-
     if (state.backPressedOnce) {
       BackHandler.exitApp();
       return true;
@@ -83,37 +155,97 @@ const Dashboard = ({navigation}) => {
 
   useEffect(() => {
     BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
     return () => {
       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     };
   }, [onBackPress]);
 
+  useEffect(() => {
+    if (!hasLoadedTodos.current) {
+      return;
+    }
+
+    saveTodosToStorage(globalState.todos);
+  }, [globalState.todos]);
+
+  const getTodosFromStorage = async () => {
+    try {
+      dispatch({type: 'SET_LOADING', inputValue: true});
+
+      const storedTodos = await AsyncStorage.getItem('todos');
+
+      if (storedTodos && storedTodos !== 'null' && storedTodos !== '[]') {
+        try {
+          const parsedTodos = JSON.parse(storedTodos);
+
+          if (Array.isArray(parsedTodos) && parsedTodos.length > 0) {
+            const validatedTodos = parsedTodos.map(todo => ({
+              id: todo.id || Date.now() + Math.random(),
+              title: todo.title || '',
+              date: todo.date || '',
+              time: todo.time || '',
+              completed: todo.completed || 0,
+            }));
+
+            dispatch({type: 'SET_TODOS', inputValue: validatedTodos});
+          } else {
+            dispatch({type: 'SET_TODOS', inputValue: []});
+          }
+        } catch (parseError) {
+          console.log('Error parsing todos from storage:', parseError);
+          dispatch({type: 'SET_TODOS', inputValue: []});
+        }
+      } else {
+        dispatch({type: 'SET_TODOS', inputValue: []});
+      }
+
+      hasLoadedTodos.current = true;
+    } catch (error) {
+      console.log('Error getting todos from storage: ', error);
+      dispatch({type: 'SET_TODOS', inputValue: []});
+      hasLoadedTodos.current = true;
+    } finally {
+      dispatch({type: 'SET_LOADING', inputValue: false});
+    }
+  };
+
+  const saveTodosToStorage = async todos => {
+    try {
+      const jsonTodos = JSON.stringify(todos);
+      await AsyncStorage.setItem('todos', jsonTodos);
+    } catch (error) {
+      console.log('Error saving todos to storage: ', error);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
+      if (!hasLoadedTodos.current) {
+        getTodosFromStorage();
+      }
       initializeDashboard();
 
       return () => {
-        console.log('Dashboard bluring...');
+        console.log('Dashboard blurring...');
       };
-    }, [globalState.user_id, globalState.token]),
+    }, [initializeDashboard]),
   );
 
   const initializeDashboard = useCallback(async () => {
     try {
-      const getName = await getDataAsync('name');
+      const getName = await AsyncStorage.getItem('name');
       await Promise.all([
         updateState('userName', getName),
-        getData(globalState.user_id, globalState.token),
-        getUserPhoto(globalState.user_id, globalState.token),
+        getPhotoUrlFromStorage(), // Load foto dari AsyncStorage dulu
         setGreetingMessage(),
       ]);
+
+      // Kemudian sync dengan server (opsional)
+      if (globalState.user_id && globalState.token) {
+        getUserPhoto(globalState.user_id, globalState.token);
+      }
     } catch (error) {
       console.log('Initialization error:', error);
-      Alert.alert(
-        'Error',
-        'An error occurred while initializing the dashboard. Please try again.',
-      );
     }
   }, [globalState.user_id, globalState.token]);
 
@@ -146,7 +278,7 @@ const Dashboard = ({navigation}) => {
 
     setTimeout(() => {
       Toast.hide(toast);
-    }, 1000); // Duration in milliseconds (3.5 seconds)
+    }, 1000);
   };
 
   const setGreetingMessage = () => {
@@ -164,173 +296,207 @@ const Dashboard = ({navigation}) => {
     updateState('greeting', greeting);
   };
 
-  const getData = async (user_id, token) => {
-    try {
-      const res = await Axios.get(`${BASE_API}/gettodo/${user_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  const openAddToDoModal = () =>
+    setState(s => ({
+      ...s,
+      showAddToDoModal: true,
+      isEditMode: false,
+      todoToEdit: null,
+    }));
 
-      updateState('SET_TODOS', res.data.data, true);
-    } catch (error) {
-      console.log('Error fetching data: ', error);
-    }
+  const closeAddToDoModal = () =>
+    setState(s => ({
+      ...s,
+      showAddToDoModal: false,
+      isEditMode: false,
+      todoToEdit: null,
+    }));
+
+  // Fungsi untuk menangani edit
+  const handleEdit = item => {
+    // Pastikan item memiliki semua data yang diperlukan
+    const todoData = {
+      id: item.id,
+      title: item.title || '',
+      date: item.date || '',
+      time: item.time || '',
+      completed: item.completed || 0,
+    };
+
+    setState(s => ({
+      ...s,
+      showAddToDoModal: true,
+      isEditMode: true,
+      todoToEdit: todoData,
+    }));
   };
-
-  const toggleShowAddToDo = () =>
-    updateState('showAddToDo', !state.showAddToDo);
 
   const deleteCheckedHandler = async () => {
     if (globalState.checkedIds.length > 0) {
-      try {
-        await Promise.all(
-          globalState.checkedIds.map(id =>
-            Axios.delete(`${BASE_API}/deletetodo/${id}`, {
-              headers: {
-                Authorization: `Bearer ${globalState.token}`,
-              },
-            }),
-          ),
-        );
-        await getData(globalState.user_id, globalState.token);
-        updateState('CLEAR_CHECKED_IDS', [], true);
-      } catch (error) {
-        console.log('Error deleting todos: ', error);
-      }
+      dispatch({type: 'DELETE_CHECKED_TODOS'});
     }
   };
 
-  const renderItem = ({item}) => (
-    <ToDo key={item.id} list={item} onGet={getData} />
-  );
+  const renderItem = ({item}) => <ToDo key={item.id} list={item} />;
 
   const handleCameraClick = () => {
     updateState('showModal', true);
   };
 
-  const getUserPhoto = async (user_id, token) => {
+  const getUserPhoto = async () => {
+    await getPhotoUrlFromStorage();
+  };
+
+  const getPhotoUrlFromStorage = async () => {
     try {
-      const res = await Axios.get(`${BASE_API}/getphoto/${user_id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const user = res.data.url;
-      updateState('SET_IMAGE_URI', user, true);
+      // Coba ambil dengan user-specific key dulu
+      let photoUri = null;
+
+      if (globalState.user_id) {
+        photoUri = await AsyncStorage.getItem(
+          `userPhoto_${globalState.user_id}`,
+        );
+      }
+
+      // Jika tidak ada, coba dengan key umum
+      if (!photoUri || photoUri === 'null' || photoUri === 'undefined') {
+        photoUri = await AsyncStorage.getItem('userPhotoUrl');
+      }
+
+      if (photoUri && photoUri !== 'null' && photoUri !== 'undefined') {
+        updateState('SET_IMAGE_URI', photoUri, true);
+      } else {
+        updateState('SET_IMAGE_URI', '', true);
+      }
     } catch (error) {
-      updateState('SET_IMAGE_URI', error.response.data.url, true);
+      console.log('Error getting photo URI from AsyncStorage:', error);
+      updateState('SET_IMAGE_URI', '', true);
     }
   };
 
+  const addTodoHandler = async newTodoData => {
+    const newTodo = {
+      id: Date.now() + Math.random(),
+      title: newTodoData.title || '',
+      date: newTodoData.date || '',
+      time: newTodoData.time || '',
+      completed: 0,
+    };
+
+    dispatch({type: 'ADD_TODO', inputValue: newTodo});
+    closeAddToDoModal();
+  };
+
+  const updateTodoHandler = async (id, updatedTodoData) => {
+    try {
+      // Dispatch update
+      dispatch({
+        type: 'UPDATE_TODO',
+        payload: {id, updatedTodo: updatedTodoData},
+      });
+
+      // Close modal dengan slight delay untuk memastikan update selesai
+      setTimeout(() => {
+        closeAddToDoModal();
+      }, 100);
+    } catch (error) {
+      console.log('Error updating todo:', error);
+      Alert.alert('Error', 'Failed to update todo. Please try again.');
+    }
+  };
+
+  const avatarSource = (() => {
+    if (
+      typeof globalState.imageUri === 'string' &&
+      globalState.imageUri.trim() &&
+      globalState.imageUri !== 'null' &&
+      globalState.imageUri !== 'undefined' &&
+      globalState.imageUri.length > 0
+    ) {
+      return {uri: globalState.imageUri};
+    }
+
+    return require('../../assets/user.png');
+  })();
+
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: activeColors.primary,
-        },
-      ]}>
+    <View style={[styles.container, {backgroundColor: activeColors.primary}]}>
       <StatusBar
         translucent
-        barStyle={theme.mode === 'light' ? 'dark-content' : activeColors.text}
-        backgroundColor={'transparent'}
+        barStyle={theme.mode === 'light' ? 'dark-content' : 'light-content'}
+        backgroundColor="transparent"
       />
 
-      <KeyboardAvoidingView behavior="position">
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={state.showModal}
-          onRequestClose={() => updateState('showModal', false)}>
-          <AddPhoto
-            isVisible={state.showModal}
-            onClose={() => updateState('showModal', false)}
-          />
-        </Modal>
+      <ImageBackground
+        source={
+          theme.mode === 'dark'
+            ? require('../../assets/bgdashboarddark.png')
+            : require('../../assets/bgdashboard.png')
+        }
+        style={styles.headerBackground}>
+        <TouchableOpacity
+          onPress={() => navigation.openDrawer()}
+          style={styles.drawer}>
+          <DrawerMenu height={43} width={39} />
+        </TouchableOpacity>
 
-        <ImageBackground
-          source={
-            theme.mode === 'dark'
-              ? require('../../assets/bgdashboarddark.png')
-              : require('../../assets/bgdashboard.png')
-          }
-          style={styles.background}>
-          <TouchableOpacity
-            onPress={() => navigation.openDrawer()}
-            style={styles.drawer}>
-            <DrawerMenu height={43} width={39} />
-          </TouchableOpacity>
-
-          <View style={styles.userWrapping}>
-            <View style={styles.userImageWrapping}>
-              <Image
-                source={
-                  globalState.imageUri
-                    ? {uri: globalState.imageUri}
-                    : require('../../assets/user.png')
-                }
-                style={styles.userImage}
-              />
-
-              <TouchableOpacity
-                onPress={handleCameraClick}
-                style={styles.camera}>
-                <Camera height={32} width={32} />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={styles.welcomeText}>Welcome {state.userName}!</Text>
-          </View>
-        </ImageBackground>
-
-        <Clock />
-        <Text style={[styles.greetingText, {color: activeColors.text}]}>
-          {state.greeting}
-        </Text>
-
-        <View
-          style={[
-            styles.toDoWrapping,
-            {backgroundColor: activeColors.secondary},
-          ]}>
-          <View style={styles.toDoHeader}>
-            <Text style={[styles.toDoText, {color: activeColors.text}]}>
-              {globalState.isDeleteMode ? 'Choose Item' : 'Tasks List'}
-            </Text>
-
+        <View style={styles.userSection}>
+          <View style={styles.avatarWrapper}>
+            <SafeImage
+              source={avatarSource}
+              style={styles.userImage}
+              defaultSource={require('../../assets/user.png')}
+              onError={error => {
+                console.warn('Avatar image error, fallback to default');
+                updateState('SET_IMAGE_URI', '', true);
+              }}
+            />
             <TouchableOpacity
-              style={styles.actionButton}
-              onPress={
-                globalState.isDeleteMode
-                  ? deleteCheckedHandler
-                  : toggleShowAddToDo
-              }>
-              {globalState.isDeleteMode ? (
-                theme.mode === 'light' ? (
-                  <Trash width={28} height={28} />
-                ) : (
-                  <DarkTrash width={28} height={28} />
-                )
-              ) : (
-                <Plus width={29} height={28} />
-              )}
+              onPress={handleCameraClick}
+              style={styles.cameraButton}>
+              <Camera height={32} width={32} />
             </TouchableOpacity>
           </View>
-
-          <FlatList
-            data={globalState.todos}
-            renderItem={renderItem}
-            keyExtractor={item => item.id.toString()}
-            style={styles.toDo}
-            ListHeaderComponent={
-              state.showAddToDo ? (
-                <AddToDo onGet={getData} onClose={toggleShowAddToDo} />
-              ) : null
-            }
-          />
+          <Text style={styles.welcomeText}>Welcome {state.userName}!</Text>
         </View>
-      </KeyboardAvoidingView>
+      </ImageBackground>
+
+      <View
+        style={[
+          styles.calendarContainer,
+          {backgroundColor: activeColors.secondary},
+        ]}>
+        <ToDoCalendar onEdit={handleEdit} />
+      </View>
+
+      <TouchableOpacity style={styles.fab} onPress={openAddToDoModal}>
+        <Plus height={15} width={15} />
+      </TouchableOpacity>
+
+      <Modal
+        transparent
+        visible={state.showModal}
+        animationType="slide"
+        onRequestClose={() => setState(s => ({...s, showModal: false}))}>
+        <AddPhoto
+          isVisible={state.showModal}
+          onClose={() => setState(s => ({...s, showModal: false}))}
+        />
+      </Modal>
+
+      <Modal
+        transparent
+        visible={state.showAddToDoModal}
+        animationType="slide"
+        onRequestClose={closeAddToDoModal}>
+        <AddToDo
+          onClose={closeAddToDoModal}
+          onAdd={addTodoHandler}
+          onUpdate={updateTodoHandler}
+          isEditMode={state.isEditMode}
+          todoToEdit={state.todoToEdit}
+        />
+      </Modal>
     </View>
   );
 };
@@ -339,69 +505,62 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  background: {
+  headerBackground: {
     width: '100%',
     height: 220,
+    paddingTop: hp('3%'),
   },
   drawer: {
-    marginTop: hp('3%'),
-    marginLeft: wp('8%'),
+    position: 'absolute',
+    top: hp('3%'),
+    left: wp('6%'),
   },
-  userWrapping: {
+  userSection: {
     alignItems: 'center',
+    marginTop: hp('6%'),
   },
-  userImageWrapping: {
+  avatarWrapper: {
     position: 'relative',
   },
   userImage: {
-    height: 120,
-    width: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
-  camera: {
+  cameraButton: {
     position: 'absolute',
-    left: 90,
-    bottom: 10,
-    right: 0,
+    right: -5,
+    bottom: 0,
   },
   welcomeText: {
-    fontSize: 20,
-    color: 'rgba(255, 255, 255, 0.85)',
+    marginTop: 8,
+    fontSize: 18,
+    color: '#fff',
     fontWeight: 'bold',
   },
   greetingText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginTop: hp('1%'),
-    marginLeft: wp('3%'),
+    fontSize: 16,
+    fontWeight: '600',
     textAlign: 'center',
+    marginVertical: hp('1%'),
   },
-  toDoWrapping: {
-    alignSelf: 'center',
-    width: '90%',
-    height: 337,
-    borderRadius: 8,
-    marginTop: hp('0.9%'),
+  calendarContainer: {
+    flex: 1,
   },
-  toDoHeader: {
-    justifyContent: 'space-between',
-    flexDirection: 'row',
+  toDoListContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
   },
-  toDoText: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginLeft: wp('5%'),
-    marginTop: hp('1%'),
-  },
-  actionButton: {
-    marginRight: wp('5%'),
-    marginTop: hp('1%'),
-    alignSelf: 'center',
-  },
-  toDo: {
-    marginLeft: wp('10%'),
-    marginBottom: hp('1%'),
-    marginTop: hp('0.5%'),
+  fab: {
+    position: 'absolute',
+    bottom: 50,
+    right: 20,
+    width: 45,
+    height: 45,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#50C2C9',
   },
 });
 

@@ -23,9 +23,15 @@ const DateInput = ({date, setDate}) => {
   const onChange = (event, selectedValue) => {
     setShowPicker(false); // Tutup picker setelah memilih
 
-    if (selectedValue) {
-      // Masukkan nilai tanggal terbaru ke setDate
-      setDate(selectedValue);
+    if (selectedValue && event.type !== 'dismissed') {
+      // Buat Date object baru dengan nilai yang dipilih untuk menghindari timezone issues
+      const newDate = new Date(
+        selectedValue.getFullYear(),
+        selectedValue.getMonth(),
+        selectedValue.getDate(),
+      );
+
+      setDate(newDate);
     }
   };
 
@@ -35,6 +41,7 @@ const DateInput = ({date, setDate}) => {
     if (!(d instanceof Date) || isNaN(d.getTime())) {
       return ': Select';
     }
+
     const months = [
       'Jan',
       'Feb',
@@ -49,13 +56,19 @@ const DateInput = ({date, setDate}) => {
       'Nov',
       'Dec',
     ];
+
+    // Gunakan getDate(), getMonth(), getFullYear() untuk konsistensi
     return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
   };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.inputButton} onPress={showDatePicker}>
-        {isDarkMode ? <CalendarDark /> : <Calendar />}
+        {isDarkMode ? (
+          <CalendarDark height={20} width={20} />
+        ) : (
+          <Calendar height={20} width={20} />
+        )}
         <Text style={[styles.text, {color: activeColors.text}]}>
           {formatDateForDisplay(date)}
         </Text>
@@ -83,13 +96,12 @@ const styles = StyleSheet.create({
     gap: hp(10),
   },
   inputButton: {
-    marginTop: hp('1%'),
     flexDirection: 'row',
     gap: wp('1%'),
     alignItems: 'center',
   },
   text: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '400',
   },
 });

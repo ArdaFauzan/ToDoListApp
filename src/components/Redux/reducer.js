@@ -8,10 +8,16 @@ const initialDashboardState = {
   loggedOut: false,
   user_id: '',
   token: '',
+  isLoading: false,
 };
 
 const DashboardReducer = (state = initialDashboardState, action) => {
   switch (action.type) {
+    case 'SET_LOADING':
+      return {
+        ...state,
+        isLoading: action.inputValue,
+      };
     case 'SET_DELETEMODE':
       return {
         ...state,
@@ -21,6 +27,56 @@ const DashboardReducer = (state = initialDashboardState, action) => {
       return {
         ...state,
         todos: action.inputValue,
+      };
+    case 'ADD_TODO':
+      const newTodo = {
+        id: action.inputValue.id || Date.now(),
+        title: action.inputValue.title || '',
+        date: action.inputValue.date || '',
+        time: action.inputValue.time || '',
+        completed: action.inputValue.completed || 0,
+      };
+      return {
+        ...state,
+        todos: [...state.todos, newTodo],
+      };
+    case 'UPDATE_TODO':
+      const {id, updatedTodo} = action.payload;
+      const updatedTodos = state.todos.map(todo => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            title:
+              updatedTodo.title !== undefined ? updatedTodo.title : todo.title,
+            date: updatedTodo.date !== undefined ? updatedTodo.date : todo.date,
+            time: updatedTodo.time !== undefined ? updatedTodo.time : todo.time,
+            completed:
+              updatedTodo.completed !== undefined
+                ? updatedTodo.completed
+                : todo.completed,
+          };
+        }
+        return todo;
+      });
+
+      return {
+        ...state,
+        todos: updatedTodos,
+      };
+    case 'DELETE_TODO':
+      const remainingTodos = state.todos.filter(
+        todo => todo.id !== action.inputValue,
+      );
+
+      return {
+        ...state,
+        todos: remainingTodos,
+      };
+    case 'DELETE_CHECKED_TODOS':
+      return {
+        ...state,
+        todos: state.todos.filter(todo => !state.checkedIds.includes(todo.id)),
+        checkedIds: [],
       };
     case 'ADD_CHECKED_ID':
       if (!state.checkedIds.includes(action.inputValue)) {
@@ -59,6 +115,22 @@ const DashboardReducer = (state = initialDashboardState, action) => {
       return {
         ...state,
         token: action.inputValue,
+      };
+    case 'RESET_STATE':
+      return initialDashboardState;
+    case 'MARK_TODO_COMPLETED':
+      return {
+        ...state,
+        todos: state.todos.map(todo =>
+          todo.id === action.inputValue ? {...todo, completed: 1} : todo,
+        ),
+      };
+    case 'MARK_TODO_INCOMPLETE':
+      return {
+        ...state,
+        todos: state.todos.map(todo =>
+          todo.id === action.inputValue ? {...todo, completed: 0} : todo,
+        ),
       };
     default:
       return state;
